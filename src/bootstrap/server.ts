@@ -6,6 +6,7 @@ import { CustomErrorHandler } from '@quorum/elisma/src/infra/errors/CustomErrorH
 import { register, registerPublic } from '@quorum/elisma/src/application/controllers'
 import swagger from '@quorum/elisma/src/application/plugins/swagger'
 import session from '@quorum/elisma/src/application/middlewares/session'
+import cors from '@quorum/elisma/src/application/plugins/cors'
 
 const logger = createWebLogger('web:elisma')
 
@@ -18,6 +19,7 @@ function newApp(container: ApplicationContainer): FastifyInstance {
 
   // Plugins
   swagger(app)
+  cors(app)
 
   app.register(
     async (router) => {

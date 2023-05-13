@@ -1,9 +1,64 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Basic Web Page</title>
-  </head>
-  <body>
-    Hello World!
-  </body>
+<head>
+  <title>elisma</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    let sessionId
+    $(document).ready(function() {
+      $("#createSessionButton").click(function() {
+        $.ajax({
+          url: "http://localhost:9000/api/v1/sessions",
+          type: "POST",
+          success: function(response) {
+            sessionId = response.id
+            $("#createSessionResponseTextArea").val(sessionId);
+          },
+          error: function(xhr) {
+            $("#createSessionResponseTextArea").val("Error");
+          }
+        });
+      });
+    });
+
+    $(document).ready(function() {
+      // Controlador de eventos del botón
+      $("#talkButton").click(function() {
+        var inputValue = $("#myInput").val(); // Obtener el valor del campo de entrada
+
+        const payload = {
+          prompt: inputValue
+        }
+        $.ajax({
+          url: "http://localhost:9000/api/v1/openai",
+          type: "POST",
+          data: JSON.stringify(payload),
+          headers: {
+            'x-session-id': sessionId
+          },
+          contentType: "application/json",
+          success: function(response) {
+            // Mostrar la respuesta en el área de texto
+            $("#elismaResponseTextArea").val(response.choices[0].text);
+          },
+          error: function(xhr) {
+            // Mostrar mensaje de error en el área de texto
+            $("#elismaResponseTextArea").val("Error");
+          }
+        });
+      });
+    });
+  </script>
+</head>
+<body>
+  <button id="createSessionButton">Create Session</button>
+  <br>
+  <textarea id="createSessionResponseTextArea" rows="1" cols="50" readonly></textarea>
+  <br>
+  <h2>Talk to elisma</h2>
+  <input type="text" id="myInput">
+  <button id="talkButton">Send</button>
+  <br>
+  <textarea id="elismaResponseTextArea" rows="10" cols="50" readonly></textarea>
+</body>
 </html>
