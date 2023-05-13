@@ -18,14 +18,11 @@ export const server: ServerConfig = {
   port: number('SERVER_PORT'),
 }
 
+/** Open AI Config **/
+type OpenAIConfig = {
+  apiKey: string
+}
 
-/*
-open ia devuelve una lista de packages: fastify, postgres, jest, vue,
-
-output una lista de librerias y a partir de ahi decidir como construir
-
-
-abstraccion de datasource
-
-inicializar todo con awilix y despues usar solo el nombre
-*/
+export const openAIConfig: OpenAIConfig = {
+  apiKey: string('OPEN_AI_API_KEY'),
+}

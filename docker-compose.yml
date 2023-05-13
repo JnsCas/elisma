@@ -1,7 +1,6 @@
 version: '3.2'
 services:
   elisma:
-    image: elisma
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -12,6 +11,7 @@ services:
       - NODE_ENV=development
       - SERVER_HOST
       - SERVER_PORT=3000
+      - OPEN_AI_API_KEY
     ports:
       - '9000:3000'
       - '5122:1339'
