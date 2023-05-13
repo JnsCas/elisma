@@ -1,0 +1,20 @@
+version: '3.2'
+services:
+  elisma:
+    image: elisma
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        SERVER_PORT: 3000
+    command: sh -c "/wait && cd /app && npx ts-node-dev -r tsconfig-paths/register --inspect=0.0.0.0:1339 -P ./tsconfig.json src/"
+    environment:
+      - NODE_ENV=development
+      - SERVER_HOST
+      - SERVER_PORT=3000
+    ports:
+      - '9000:3000'
+      - '5122:1339'
+    volumes:
+      - ./:/app
+      - ./.env:/app/.env

@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2022",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "allowJs": true,
+    "outDir": "dist",
+    "lib": ["ES2022"],
+    "baseUrl": ".",
+    "paths": {
+      "@quorum/elisma/src/*": ["src/*"],
+      "@quorum/elisma/test/*": ["test/*"]
+    }
+  },
+  "ts-node": {
+    "files": true,
+    "require": ["tsconfig-paths/register"]
+  }
+}
