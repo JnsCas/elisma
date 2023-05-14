@@ -1,0 +1,30 @@
+/*
+  Click and drag to attract
+  Right click to repulse
+  Mouse-wheel click to create a time dilation field
+  Use the Controls to decrease or increase
+  the particle count to tweak performance.
+*/
+
+body, html {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #fff;
+  font-family: sans-serif;
+  margin: 30px;
+}
+
+canvas {
+  display: block;
+  cursor: crosshair;
+  right: 0;
+  position: absolute;
+}
+
+.content {
+  float: left;
+}
+

@@ -10,11 +10,12 @@ services:
     environment:
       - NODE_ENV=development
       - SERVER_HOST
-      - SERVER_PORT=3000
+      - SERVER_PORT
+      - SERVER_PUBLIC_DIR
       - OPEN_AI_API_KEY
     ports:
       - '9000:3000'
-      - '5122:1339'
+      - '6122:1339'
     volumes:
       - ./:/app
       - ./.env:/app/.env

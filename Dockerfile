@@ -1,4 +1,4 @@
-FROM node:16-alpine as builder
+FROM node:18-alpine as builder
 
 ARG SERVER_PORT
 RUN test -n "${SERVER_PORT}" || (echo "PORT not set" && false)
@@ -22,7 +22,7 @@ RUN NODE_ENV=development npm install
 RUN npx tsc
 RUN npm prune --omit=dev
 
-FROM node:16-alpine
+FROM node:18-alpine
 
 ENV NODE_ENV=production
 
@@ -32,6 +32,7 @@ COPY --from=0 /wait /wait
 COPY --from=builder  /build/dist /app/src
 COPY --from=builder  /build/node_modules /app/node_modules
 COPY --from=builder  /build/package.json /app/package.json
+COPY --from=builder  /build/tsconfig.json /app/tsconfig.json
 
 USER node
 EXPOSE $SERVER_PORT

@@ -2,6 +2,8 @@
 <html>
 <head>
   <title>elisma</title>
+
+  <link rel="stylesheet" href="/assets/css/isma.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
     let sessionId
@@ -48,14 +50,22 @@
   </script>
 </head>
 <body>
-  <button id="createSessionButton">Create Session</button>
-  <br>
-  <textarea id="createSessionResponseTextArea" rows="1" cols="50" readonly></textarea>
-  <br>
-  <h2>Talk to elisma</h2>
-  <input type="text" id="myInput">
-  <button id="talkButton">Send</button>
-  <br>
-  <textarea id="elismaResponseTextArea" rows="10" cols="50" readonly></textarea>
+  <div class="content">
+    <h1>El IsmA</h1>
+    <button id="createSessionButton">Create Session</button>
+    <br>
+    <textarea id="createSessionResponseTextArea" rows="1" cols="50" readonly></textarea>
+    <br>
+    <h2>Talk to elisma</h2>
+    <input type="text" id="myInput">
+    <button id="talkButton">Send</button>
+    <br>
+    <textarea id="elismaResponseTextArea" rows="10" cols="50" readonly></textarea>
+  </div>
+
+  <canvas id="swarm"></canvas>
+
+  <script type="text/javascript" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/188512/codepen-utilities.min.js"></script>
+  <script type="text/javascript" src="/assets/js/brain.js"></script>
 </body>
 </html>
