@@ -9,6 +9,8 @@ type ServerConfig = {
   host: string
   /** Port to bind the server to. */
   port: number
+  /** Path to the frontend directory. */
+  publicDir: string
 }
 
 /** Current server configuration. */
@@ -16,6 +18,7 @@ export const server: ServerConfig = {
   environment: string('NODE_ENV'),
   host: string('SERVER_HOST'),
   port: number('SERVER_PORT'),
+  publicDir: string('SERVER_PUBLIC_DIR'),
 }
 
 /** Open AI Config **/
