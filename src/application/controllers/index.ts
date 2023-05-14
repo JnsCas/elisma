@@ -13,7 +13,8 @@ import { POST_OPENAI_OPTIONS } from '@quorum/elisma/src/application/controllers/
  */
 export function register(app: FastifyInstance, container: ApplicationContainer) {
   const openAIController: OpenAIController = container.cradle.openAIController
-  app.post('/openai', POST_OPENAI_OPTIONS, openAIController.send.bind(openAIController))
+  app.post('/openai/completion', POST_OPENAI_OPTIONS, openAIController.sendCompletion.bind(openAIController))
+  app.post('/openai/chat-completion', POST_OPENAI_OPTIONS, openAIController.sendChatCompletion.bind(openAIController))
 }
 
 /** Registers all public endpoints.

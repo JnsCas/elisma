@@ -5,6 +5,7 @@ import { Configuration, OpenAIApi } from 'openai'
 import { SessionService } from '@quorum/elisma/src/domain/session/SessionService'
 import { OpenAIService } from '@quorum/elisma/src/domain/openai/OpenAIService'
 import { OpenAIClient } from '@quorum/elisma/src/domain/openai/OpenAIClient'
+import { SessionRepository } from '@quorum/elisma/src/domain/session/SessionRepository'
 
 function newOpenAIApi() {
   return new OpenAIApi(new Configuration(openAIConfig))
@@ -18,7 +19,9 @@ function initClients() {
 }
 
 function initRepositories() {
-  return {}
+  return {
+    sessionRepository: asClass(SessionRepository).singleton(),
+  }
 }
 
 function initServices() {

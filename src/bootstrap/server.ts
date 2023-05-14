@@ -7,6 +7,7 @@ import { register, registerPublic } from '@quorum/elisma/src/application/control
 import swagger from '@quorum/elisma/src/application/plugins/swagger'
 import session from '@quorum/elisma/src/application/middlewares/session'
 import cors from '@quorum/elisma/src/application/plugins/cors'
+import fastifyRequestContext from '@quorum/elisma/src/application/plugins/fastifyRequestContext'
 
 const logger = createWebLogger('web:elisma')
 
@@ -20,6 +21,7 @@ function newApp(container: ApplicationContainer): FastifyInstance {
   // Plugins
   swagger(app)
   cors(app)
+  fastifyRequestContext(app)
 
   app.register(
     async (router) => {

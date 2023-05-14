@@ -8,10 +8,17 @@ const logger = createLogger('OpenAIController')
 export class OpenAIController {
   constructor(private readonly openAIService: OpenAIService) {}
 
-  async send(req: SendRequest, res: FastifyReply): Promise<void> {
-    logger.info(`Receiving prompt to send to Open AI...`)
+  async sendCompletion(req: SendRequest, res: FastifyReply): Promise<void> {
+    logger.info(`Sending completion to Open AI...`)
     const { prompt } = req.body
-    const response = await this.openAIService.send(prompt)
+    const response = await this.openAIService.sendCompletion(prompt)
+    return res.send(response)
+  }
+
+  async sendChatCompletion(req: SendRequest, res: FastifyReply): Promise<void> {
+    logger.info(`Sending chat completion to Open AI...`)
+    const { prompt } = req.body
+    const response = await this.openAIService.sendChatCompletion(prompt)
     return res.send(response)
   }
 }
