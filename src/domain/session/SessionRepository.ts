@@ -11,14 +11,16 @@ export class SessionRepository {
     this.sessionById = new Map<string, Session>()
   }
 
-  save(session: Session): void {
+  save(session: Session): Session {
     logger.debug(`Saving session id ${session.id}`)
     this.sessionById.set(session.id, session)
+    return session
   }
 
-  update(session: Session): void {
+  update(session: Session): Session {
     logger.debug(`Updating session id ${session.id}`)
     this.sessionById.set(session.id, session)
+    return session
   }
 
   getById(id: string): Optional<Session> {
