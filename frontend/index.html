@@ -39,7 +39,7 @@
           },
           contentType: "application/json",
           success: function(response) {
-            $("#elismaResponseTextArea").val(response.content);
+            $("#elismaResponseTextArea").val(response);
           },
           error: function(xhr) {
             $("#elismaResponseTextArea").val("Error");

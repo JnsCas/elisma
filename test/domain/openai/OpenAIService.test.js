@@ -25,6 +25,7 @@ describe('OpenAIService', () => {
 
     const service = container.cradle.openAIService
     const libraries = await service.selectLibraries(
+      session,
       'I need to build a CLI application. It will generate a set of reports in CSV from a database. The database can be postgres or mongo.'
     )
     expect(libraries.length).toBeTruthy()
