@@ -9,6 +9,7 @@ import { Optional } from '@quorum/elisma/src/infra/Optional'
 import { Library } from '@quorum/elisma/src/domain/scaffolding/entities/Library'
 import { createPrompt } from '@quorum/elisma/src/domain/openai/ScaffoldingPrompt'
 import { SupportedLibraries } from '@quorum/elisma/src/SupportedLibraries'
+import { ChatMessage } from '@quorum/elisma/src/domain/openai/entities/ChatMessage'
 
 const logger = createLogger('OpenAIService')
 
@@ -37,6 +38,7 @@ export class OpenAIService {
   }
 
   async selectLibraries(projectRequirements: string): Promise<Library[]> {
+    logger.info(`Selecting libraries...`)
     const prompt = createPrompt(SupportedLibraries, projectRequirements)
     const message = await this.sendChatCompletion(prompt)
     const urlRegex = /(https?:\/\/[^\s]+)/g
@@ -68,5 +70,21 @@ export class OpenAIService {
 
         return [...libraries, ...candidates]
       }, [])
+  }
+
+  async sendChatCompletionMessages(chatMessages: ChatMessage[]) {
+    logger.info(`Sending role and prompt to chat completion Open AI...`)
+    const session = this.sessionService.getById(RequestContextHolder.getContext().sessionId)
+    if (!session) {
+      throw new ResourceNotFoundError()
+    }
+    session.addChatMessages(chatMessages)
+    const chatCompletionResponse = await this.openAIClient.createChatCompletion(session.messages)
+    const messageResponse = chatCompletionResponse.choices[0].message
+    if (messageResponse) {
+      session.addChatMessage(messageResponse.role as Role, messageResponse.content)
+    }
+    this.sessionService.update(session)
+    return messageResponse
   }
 }

@@ -15,6 +15,8 @@ export function register(app: FastifyInstance, container: ApplicationContainer) 
   const openAIController: OpenAIController = container.cradle.openAIController
   app.post('/openai/completion', POST_OPENAI_OPTIONS, openAIController.sendCompletion.bind(openAIController))
   app.post('/openai/chat-completion', POST_OPENAI_OPTIONS, openAIController.sendChatCompletion.bind(openAIController))
+  app.post('/openai/select-libraries', POST_OPENAI_OPTIONS, openAIController.selectLibraries.bind(openAIController))
+  app.post('/openai/chat-completion/messages', {}, openAIController.sendChatCompletionMessages.bind(openAIController))
 }
 
 /** Registers all public endpoints.
@@ -27,4 +29,5 @@ export function registerPublic(app: FastifyInstance, container: ApplicationConta
   app.get('/health-check', HEALTH_CHECK_OPTIONS, healthCheckController.status.bind(healthCheckController))
   const sessionController: SessionController = container.cradle.sessionController
   app.post('/sessions', {}, sessionController.create.bind(sessionController))
+  app.get('/sessions/:id', {}, sessionController.getById.bind(sessionController))
 }
