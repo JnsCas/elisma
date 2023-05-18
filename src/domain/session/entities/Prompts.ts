@@ -1,5 +1,5 @@
-import { Scaffolding } from '@quorum/elisma/src/domain/scaffolding/entities/Scaffolding'
-import { ProjectLanguage } from '@quorum/elisma/src/domain/scaffolding/entities/ProjectLanguage'
+import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
+import { Scaffolding } from '@quorum/elisma/src/domain/bundle/entities/Scaffolding'
 
 export function receiveLanguagePrompt(): string {
   return `te voy a decir en que lenguaje quiero generar mi proyecto, las unicas opciones aceptables son ${Object.values(

@@ -1,11 +1,11 @@
-import { Library } from '@quorum/elisma/src/domain/scaffolding/entities/Library'
-import { ProjectLanguage } from '@quorum/elisma/src/domain/scaffolding/entities/ProjectLanguage'
+import { LibraryDefinition } from '@quorum/elisma/src/domain/bundle/entities/LibraryDefinition'
+import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
 
 export class Scaffolding {
   private language?: ProjectLanguage
   private name?: string
   private requirements?: string
-  private selectedLibraries: Library[]
+  private selectedLibraries: LibraryDefinition[]
 
   constructor() {
     this.language = undefined
@@ -29,7 +29,7 @@ export class Scaffolding {
     return this
   }
 
-  setSelectedLibraries(libraries: Library[]): Scaffolding {
+  setSelectedLibraries(libraries: LibraryDefinition[]): Scaffolding {
     this.selectedLibraries = libraries
     return this
   }

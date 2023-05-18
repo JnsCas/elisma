@@ -1,12 +1,12 @@
 import { FastifyInstance } from 'fastify'
-import { ApplicationContainer, initApplication } from '@quorum/elisma/src/infra/bootstrap'
-import { registerDomain } from '@quorum/elisma/src/bootstrap/domain'
-import { registerServer } from '@quorum/elisma/src/bootstrap/server'
-import { registerControllers } from '@quorum/elisma/src/bootstrap/controllers'
+import { ApplicationContainer, ApplicationRegistry } from '@quorum/elisma/src/infra/bootstrap'
 
 export async function initTestApp(): Promise<{ app: FastifyInstance; container: ApplicationContainer }> {
+  ApplicationRegistry.addBootstrapDir('./src/bootstrap')
+
   const start = Date.now()
-  const container = await initApplication([registerDomain, registerServer, registerControllers], [])
+  const container = await ApplicationRegistry.initialize()
+
   const app: FastifyInstance = container.cradle.app
   app.log.info(`app ready, took ${Date.now() - start}ms`)
 

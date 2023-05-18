@@ -13,9 +13,7 @@
     "lib": ["ES2022"],
     "baseUrl": ".",
     "paths": {
-      "@quorum/lib/*": ["lib/*"],
-      "@quorum/elisma/src/*": ["src/*"],
-      "@quorum/elisma/test/*": ["test/*"]
+      "@quorum/lib/dummy/src/*": ["src/*"],
     }
   },
   "ts-node": {

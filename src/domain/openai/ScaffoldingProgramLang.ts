@@ -1,4 +1,4 @@
-import { ProjectLanguage } from '@quorum/elisma/src/domain/scaffolding/entities/ProjectLanguage'
+import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
 
 export function createProgramLangPrompt(): string {
   return `

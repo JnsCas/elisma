@@ -1,9 +1,9 @@
 import { IdManager } from '@quorum/elisma/src/infra/IdManager'
 import { ChatMessage } from '@quorum/elisma/src/domain/openai/entities/ChatMessage'
 import { Role } from '@quorum/elisma/src/domain/openai/entities/Role'
-import { Scaffolding } from '@quorum/elisma/src/domain/scaffolding/entities/Scaffolding'
-import { Library } from '@quorum/elisma/src/domain/scaffolding/entities/Library'
-import { ProjectLanguage } from '@quorum/elisma/src/domain/scaffolding/entities/ProjectLanguage'
+import { Scaffolding } from '@quorum/elisma/src/domain/bundle/entities/Scaffolding'
+import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
+import { LibraryDefinition } from '@quorum/elisma/src/domain/bundle/entities/LibraryDefinition'
 
 export class Session {
   private scaffolding: Scaffolding
@@ -33,7 +33,7 @@ export class Session {
     this.scaffolding.setRequirements(requirements)
   }
 
-  setScaffoldingSelectedLibraries(libraries: Library[]) {
+  setScaffoldingSelectedLibraries(libraries: LibraryDefinition[]) {
     this.scaffolding.setSelectedLibraries(libraries)
   }
 

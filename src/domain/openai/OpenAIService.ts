@@ -3,23 +3,23 @@ import { createLogger } from '@quorum/elisma/src/infra/log'
 import { Role } from '@quorum/elisma/src/domain/openai/entities/Role'
 import { SessionService } from '@quorum/elisma/src/domain/session/SessionService'
 import { Session } from '@quorum/elisma/src/domain/session/entities/Session'
-import { ProjectLanguage } from '@quorum/elisma/src/domain/scaffolding/entities/ProjectLanguage'
 import {
-  nameQuestionPrompt,
   generateProjectPrompt,
+  nameQuestionPrompt,
   receiveLanguagePrompt,
   receiveNamePrompt,
   requirementsQuestionPrompt,
 } from '@quorum/elisma/src/domain/session/entities/Prompts'
+import { ResourceNotFoundError } from '@quorum/elisma/src/infra/errors/genericHttpErrors/ResourceNotFoundError'
+import { Optional } from '@quorum/elisma/src/infra/Optional'
+import { LibraryDefinition } from '@quorum/elisma/src/domain/bundle/entities/LibraryDefinition'
 import { createPrompt } from '@quorum/elisma/src/domain/openai/ScaffoldingPrompt'
 import { SupportedLibraries } from '@quorum/elisma/src/SupportedLibraries'
-import { Library } from '@quorum/elisma/src/domain/scaffolding/entities/Library'
 import { ChatCompletionResponse } from '@quorum/elisma/src/domain/openai/entities/ChatCompletionResponse'
-import { Optional } from '@quorum/elisma/src/infra/Optional'
 import { createProgramLangPrompt } from '@quorum/elisma/src/domain/openai/ScaffoldingProgramLang'
 import { RequestContextHolder } from '@quorum/elisma/src/infra/context/RequestContextHolder'
-import { ResourceNotFoundError } from '@quorum/elisma/src/infra/errors/genericHttpErrors/ResourceNotFoundError'
 import { CompletionResponse } from '@quorum/elisma/src/domain/openai/entities/CompletionResponse'
+import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
 
 const logger = createLogger('OpenAIService')
 
@@ -93,7 +93,7 @@ export class OpenAIService {
     return await this.openAIClient.createCompletion(prompt)
   }
 
-  async selectLibraries(session: Session, projectRequirements: string): Promise<Library[]> {
+  async selectLibraries(session: Session, projectRequirements: string): Promise<LibraryDefinition[]> {
     const prompt = createPrompt(SupportedLibraries, projectRequirements)
     const { message } = await this.sendChatCompletion(session, prompt)
     const urlRegex = /(https?:\/\/[^\s]+)/g
@@ -110,14 +110,14 @@ export class OpenAIService {
     return lines
       .map((line) => line.trim())
       .filter((line) => line.includes('->'))
-      .reduce((libraries: Library[], line) => {
+      .reduce((libraries: LibraryDefinition[], line) => {
         const fields = line.split('->')
         const category = fields[0]?.trim()
         const urls = fields[1]?.trim()?.match(urlRegex) || []
         const candidates = urls.map((url) => {
           const candidate = SupportedLibraries.find((library) => library.url === url)
           if (!candidate) {
-            return Library.create(url, category, url)
+            return LibraryDefinition.create(url, category, url)
           } else {
             return candidate
           }
