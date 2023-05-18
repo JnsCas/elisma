@@ -1,7 +1,6 @@
-import { ProjectLanguage } from '@quorum/elisma/src/domain/scaffolding/entities/ProjectLanguage'
+import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
 
 export function createProgramLangPrompt(): string {
-
   return `
     I have the following list which includes programming languages.
     

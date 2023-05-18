@@ -1,6 +1,6 @@
-import { Library } from '@quorum/elisma/src/domain/scaffolding/entities/Library'
+import { LibraryDefinition } from '@quorum/elisma/src/domain/bundle/entities/LibraryDefinition'
 
-export function createPrompt(libraries: Library[], projectRequirements: string): string {
+export function createPrompt(libraries: LibraryDefinition[], projectRequirements: string): string {
   const libraryPrompt = libraries.map((library) => `* ${library.packageName} -> ${library.category}`).join('\n    ')
 
   return `

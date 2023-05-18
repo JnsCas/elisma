@@ -1,7 +1,7 @@
 import { asFunction, asValue } from 'awilix'
 import Fastify, { FastifyInstance, FastifyRequest } from 'fastify'
 import { createWebLogger } from '@quorum/elisma/src/infra/log'
-import { ApplicationContainer } from '@quorum/elisma/src/infra/bootstrap'
+import { ApplicationContainer, ApplicationRegistry } from '@quorum/elisma/src/infra/bootstrap'
 import { CustomErrorHandler } from '@quorum/elisma/src/infra/errors/CustomErrorHandler'
 import { register, registerPublic } from '@quorum/elisma/src/application/controllers'
 import swagger from '@quorum/elisma/src/application/plugins/swagger'
@@ -9,6 +9,7 @@ import session from '@quorum/elisma/src/application/middlewares/session'
 import cors from '@quorum/elisma/src/application/plugins/cors'
 import fastifyRequestContext from '@quorum/elisma/src/application/plugins/fastifyRequestContext'
 import staticFiles from '@quorum/elisma/src/application/plugins/staticFiles'
+import { server as serverConfig } from '@quorum/elisma/src/config'
 
 const logger = createWebLogger('web:elisma')
 
@@ -46,9 +47,21 @@ function newApp(container: ApplicationContainer): FastifyInstance {
   return app
 }
 
-export async function registerServer(container: ApplicationContainer) {
+ApplicationRegistry.register(async function registerServer(container: ApplicationContainer) {
   container.register({
     app: asFunction(newApp).singleton(),
     container: asValue(container),
   })
-}
+
+  container.onStart(async () => {
+    const app = container.cradle.app
+
+    try {
+      logger.info(`NODE_ENV: ${serverConfig.environment}`)
+      app.listen({ port: serverConfig.port, host: serverConfig.host })
+    } catch (err) {
+      logger.error(err)
+      process.exit(1)
+    }
+  })
+})

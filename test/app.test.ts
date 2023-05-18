@@ -1,11 +1,10 @@
-import { initApplication } from '@quorum/elisma/src/infra/bootstrap'
-import { registerDomain } from '@quorum/elisma/src/bootstrap/domain'
-import { registerServer } from '@quorum/elisma/src/bootstrap/server'
-import { registerControllers } from '@quorum/elisma/src/bootstrap/controllers'
+import { ApplicationRegistry } from '@quorum/elisma/src/infra/bootstrap'
 
 describe('App Basics', function () {
   test('app starts successfully', async () => {
-    const container = await initApplication([registerDomain, registerServer, registerControllers], [])
+    ApplicationRegistry.addBootstrapDir('./src/bootstrap')
+
+    const container = await ApplicationRegistry.initialize()
     const server = container.cradle.app
     expect(server).toBeTruthy()
     await server.close()

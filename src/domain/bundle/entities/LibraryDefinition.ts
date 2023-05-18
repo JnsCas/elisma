@@ -1,6 +1,6 @@
-export class Library {
-  static create(packageName: string, category: string, url: string): Library {
-    return new Library(packageName, category, url)
+export class LibraryDefinition {
+  static create(packageName: string, category: string, url: string): LibraryDefinition {
+    return new LibraryDefinition(packageName, category, url)
   }
 
   private constructor(
