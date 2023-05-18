@@ -10,12 +10,13 @@ import {
   receiveLanguagePrompt,
   receiveNamePrompt,
   requirementsQuestionPrompt,
+  retryProgramLangPrompt,
+  retryPrompt,
   sayGoodByePrompt,
 } from '@quorum/elisma/src/domain/session/entities/Prompts'
 import { ResourceNotFoundError } from '@quorum/elisma/src/infra/errors/genericHttpErrors/ResourceNotFoundError'
 import { Optional } from '@quorum/elisma/src/infra/Optional'
 import { LibraryDefinition } from '@quorum/elisma/src/domain/bundle/entities/LibraryDefinition'
-import { createPrompt } from '@quorum/elisma/src/domain/openai/ScaffoldingPrompt'
 import { SupportedLibraries } from '@quorum/elisma/src/SupportedLibraries'
 import { ChatCompletionResponse } from '@quorum/elisma/src/domain/openai/entities/ChatCompletionResponse'
 import { RequestContextHolder } from '@quorum/elisma/src/infra/context/RequestContextHolder'
@@ -24,26 +25,36 @@ import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/Proje
 
 const logger = createLogger('OpenAIService')
 
+const MAX_TRIES = 3
+
 export class OpenAIService {
   constructor(private readonly openAIClient: OpenAIClient, private readonly sessionService: SessionService) {}
 
+  async askProgrammingLanguage(): Promise<Optional<string>> {
+    logger.info(`Asking programming language to the user...`)
+    const session = this.sessionService.getById(RequestContextHolder.getContext().sessionId)
+    if (!session) {
+      throw new ResourceNotFoundError()
+    }
+    const { question } = await this.sendChatCompletion(session, createProgramLangPrompt())
+    this.sessionService.update(session)
+    return question
+  }
+
   async receiveLanguage(session: Session, prompt: string) {
     session.addChatMessage(Role.USER, receiveLanguagePrompt())
-    const { answer: selectedLanguage, message: firstMessage } = await this.sendChatCompletion(session, prompt)
-    const language = selectedLanguage as ProjectLanguage
-    if (!language) {
-      logger.info(`The user did not select the language`)
-      return firstMessage
+    const { answer } = await this.sendChatCompletion(session, prompt)
+    if (answer && !this.isValidLanguage(answer)) {
+      const { answer } = await this.sendChatCompletion(session, retryProgramLangPrompt(prompt))
+      return answer
     }
+    const language = answer as ProjectLanguage
     session.setScaffolingLanguage(language)
 
-    const { question: nextQuestion, message: secondMessage } = await this.sendChatCompletion(
+    const { question: nextQuestion } = await this.sendChatCompletion(
       session,
       nameQuestionPrompt(session.getScaffolding)
     )
-    if (!nextQuestion) {
-      return secondMessage
-    }
     return nextQuestion
   }
 
@@ -55,14 +66,10 @@ export class OpenAIService {
     }
     session.setScaffolingName(projectName)
 
-    const { question: nextQuestion, message: secondMessage } = await this.sendChatCompletion(
+    const { question: nextQuestion } = await this.sendChatCompletion(
       session,
       requirementsQuestionPrompt(session.getScaffolding)
     )
-
-    if (!nextQuestion) {
-      return secondMessage
-    }
     return nextQuestion
   }
 
@@ -87,10 +94,24 @@ export class OpenAIService {
     return answer
   }
 
-  async sendChatCompletion(session: Session, prompt: string): Promise<ChatCompletionResponse> {
+  async sendChatCompletion(session: Session, prompt: string, tryNumber = 0): Promise<ChatCompletionResponse> {
     logger.info(`Sending prompt ${prompt} to Open AI chat completion...`)
     session.addChatMessage(Role.USER, prompt)
-    return await this.openAIClient.createChatCompletion(session.messages)
+    try {
+      return await this.openAIClient.createChatCompletion(session.messages)
+    } catch (e) {
+      if (e instanceof SyntaxError) {
+        if (tryNumber < MAX_TRIES) {
+          const nextTryNumber = tryNumber + 1
+          logger.info(`Error parsing Open AI response, trying again ${nextTryNumber}/${MAX_TRIES}...`)
+          return await this.sendChatCompletion(session, retryPrompt(prompt), nextTryNumber)
+        } else {
+          logger.info(`Error parsing Open AI response`, e)
+          throw e
+        }
+      }
+      throw e
+    }
   }
 
   async sendCompletion(prompt: string): Promise<CompletionResponse> {
@@ -98,48 +119,7 @@ export class OpenAIService {
     return await this.openAIClient.createCompletion(prompt)
   }
 
-  async selectLibraries(session: Session, projectRequirements: string): Promise<LibraryDefinition[]> {
-    const prompt = createPrompt(SupportedLibraries, projectRequirements)
-    const { message } = await this.sendChatCompletion(session, prompt)
-    const urlRegex = /(https?:\/\/[^\s]+)/g
-
-    if (!message) {
-      throw new Error('no response from model')
-    }
-
-    const lines = message.split('\n')
-    if (!lines.length || !lines.some((line) => line.includes('->'))) {
-      throw new Error('invalid response from model')
-    }
-
-    return lines
-      .map((line) => line.trim())
-      .filter((line) => line.includes('->'))
-      .reduce((libraries: LibraryDefinition[], line) => {
-        const fields = line.split('->')
-        const category = fields[0]?.trim()
-        const urls = fields[1]?.trim()?.match(urlRegex) || []
-        const candidates = urls.map((url) => {
-          const candidate = SupportedLibraries.find((library) => library.url === url)
-          if (!candidate) {
-            return LibraryDefinition.create(url, category, url)
-          } else {
-            return candidate
-          }
-        })
-
-        return [...libraries, ...candidates]
-      }, [])
-  }
-
-  async askProgrammingLanguage(): Promise<Optional<string>> {
-    logger.info(`Asking programming language to the user...`)
-    const session = this.sessionService.getById(RequestContextHolder.getContext().sessionId)
-    if (!session) {
-      throw new ResourceNotFoundError()
-    }
-    const { message } = await this.sendChatCompletion(session, createProgramLangPrompt())
-    this.sessionService.update(session)
-    return message
+  private isValidLanguage(language: string): boolean {
+    return Object.values(ProjectLanguage).includes(language as ProjectLanguage)
   }
 }

@@ -2,6 +2,22 @@
 <html>
 <head>
   <title>elisma</title>
+  <style>
+    .input-container {
+        display: flex;
+    }
+
+    #myInput {
+        flex: 9;
+        width: 90%;
+        box-sizing: border-box;
+    }
+
+    #talkButton {
+        flex: 1;
+        width: 10%;
+    }
+  </style>
 
   <link rel="stylesheet" href="/assets/css/isma.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -91,8 +107,8 @@
               }
             });
           },
-          error: function(xhr) {
-            alert("Error")
+          error: function(response) {
+            alert(`Error: ${JSON.stringify(response)}`)
           }
         });
       });
@@ -133,8 +149,10 @@
     <h1>El IsmA</h1>
     <textarea id="elismaResponseTextArea" rows="10" cols="50" readonly></textarea>
     <br>
-    <input type="text" id="myInput">
-    <button id="talkButton">Send</button>
+    <div class="input-container">
+      <input type="text" id="myInput" class="wide-input">
+      <button id="talkButton">Send</button>
+    </div>
     <br>
     <div id="radioList"></div>
     <br>

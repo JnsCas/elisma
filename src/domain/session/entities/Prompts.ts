@@ -6,6 +6,11 @@ export function createProgramLangPrompt(): string {
     Tengo la siguiente lista de lenguajes de programacion soportados para crear un proyecto.
     ${Object.values(ProjectLanguage).join(' o ')}
     Preguntame cual de estos lenguajes quiero usar para mi proyecto.
+    Utiliza esta estructura JSON como respuesta:
+    {
+      "question": "{tu pregunta}"
+    }
+    Debes enviar solamente un JSON válido como respuesta de texto.
   `
 }
 
@@ -16,12 +21,14 @@ export function receiveLanguagePrompt(): string {
     {
       "answer": {aca tiene que ir el lenguaje de programacion que elegi}
     }
+    Debes enviar solamente un JSON válido como respuesta de texto.
   `
 }
 
 export function receiveNamePrompt(prompt: string): string {
   return `me preguntaron que nombre quiero ponerle a mi proyecto y conteste esto "${prompt}".
-  Quiero que contestes en el siguiente formato JSON, cual fue el nombre que elegi para mi proyecto:{"answer": {aca tiene que ir el nombre de mi proyecto que elegi}}`
+  Quiero que contestes en el siguiente formato JSON, cual fue el nombre que elegi para mi proyecto:{"answer": {aca tiene que ir el nombre de mi proyecto que elegi}}
+  Debes enviar solamente un JSON válido como respuesta de texto.`
 }
 
 export function nameQuestionPrompt(scaffolding: Scaffolding): string {
@@ -31,7 +38,8 @@ export function nameQuestionPrompt(scaffolding: Scaffolding): string {
   me lo vas a preguntar usando el siguiente formato JSON:
   {
     "question": {aca tiene que ir tu pregunta},
-  }`
+  }
+  Debes enviar solamente un JSON válido como respuesta de texto.`
 }
 
 export function requirementsQuestionPrompt(scaffolding: Scaffolding): string {
@@ -41,7 +49,8 @@ export function requirementsQuestionPrompt(scaffolding: Scaffolding): string {
   me lo vas a preguntar usando el siguiente formato JSON:
   {
     "question": {aca tiene que ir tu pregunta},
-  }`
+  }
+  Debes enviar solamente un JSON válido como respuesta de texto.`
 }
 
 export function generateProjectPrompt(scaffolding: Scaffolding): string {
@@ -55,6 +64,30 @@ export function generateProjectPrompt(scaffolding: Scaffolding): string {
   },
   "jest": {
     "category": "test framework",
+  },
+  "mocha": {
+    "category": "test framework",
+  },
+  "pino": {
+    "category": "logger",
+  },
+  "winston": {
+    "category": "logger",
+  },
+  "postgres": {
+    "category": "database driver",
+  },
+  "sqlite": {
+    "category": "database driver",
+  },
+  "mysql": {
+    "category": "database driver",
+  },
+  "mongo": {
+    "category": "database driver",
+  },
+  "commander": {
+    "category": "command line interface",
   }
 }
 
@@ -69,5 +102,15 @@ My project requirements are as follows: "${scaffolding.getRequirements}"`
 export function sayGoodByePrompt() {
   return `Quiero que contestes en el siguiente formato JSON, un mensaje de despedida.
   JSON a utilizar: {"answer":{mensaje de despedida}}
-  El JSON que tenes que retornar, tiene que poder ser parseado de manera eficiente usando el metodo JSON.parse({tu JSON de respuesta})`
+  El JSON que tenes que retornar, tiene que poder ser parseado de manera eficiente usando el metodo JSON.parse({tu JSON de respuesta})
+  Debes enviar solamente un JSON válido como respuesta de texto.`
+}
+
+export function retryPrompt(failedPrompt: string) {
+  return `No estas respetando el formato JSON que te pedi cuando te dije "${failedPrompt}". 
+  Contestame otra vez pero solo utilizando ese formato JSON, sin ningun otro texto adicional`
+}
+
+export function retryProgramLangPrompt(failedPrompt: string) {
+  return `el usuario eligio el lenguaje ${failedPrompt} y no es soportado. Decile que elija un lenguaje de programacion valido`
 }
