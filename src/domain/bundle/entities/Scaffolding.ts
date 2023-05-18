@@ -53,4 +53,8 @@ export class Scaffolding {
   get getName() {
     return this.name
   }
+
+  get getRequirements() {
+    return this.requirements
+  }
 }

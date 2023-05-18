@@ -4,11 +4,13 @@ import { Role } from '@quorum/elisma/src/domain/openai/entities/Role'
 import { SessionService } from '@quorum/elisma/src/domain/session/SessionService'
 import { Session } from '@quorum/elisma/src/domain/session/entities/Session'
 import {
+  createProgramLangPrompt,
   generateProjectPrompt,
   nameQuestionPrompt,
   receiveLanguagePrompt,
   receiveNamePrompt,
   requirementsQuestionPrompt,
+  sayGoodByePrompt,
 } from '@quorum/elisma/src/domain/session/entities/Prompts'
 import { ResourceNotFoundError } from '@quorum/elisma/src/infra/errors/genericHttpErrors/ResourceNotFoundError'
 import { Optional } from '@quorum/elisma/src/infra/Optional'
@@ -16,7 +18,6 @@ import { LibraryDefinition } from '@quorum/elisma/src/domain/bundle/entities/Lib
 import { createPrompt } from '@quorum/elisma/src/domain/openai/ScaffoldingPrompt'
 import { SupportedLibraries } from '@quorum/elisma/src/SupportedLibraries'
 import { ChatCompletionResponse } from '@quorum/elisma/src/domain/openai/entities/ChatCompletionResponse'
-import { createProgramLangPrompt } from '@quorum/elisma/src/domain/openai/ScaffoldingProgramLang'
 import { RequestContextHolder } from '@quorum/elisma/src/infra/context/RequestContextHolder'
 import { CompletionResponse } from '@quorum/elisma/src/domain/openai/entities/CompletionResponse'
 import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
@@ -67,19 +68,23 @@ export class OpenAIService {
 
   async receiveRequirements(session: Session, prompt: string) {
     session.addChatMessage(Role.USER, prompt) //adding this just in case
-    const { message } = await this.sendChatCompletion(session, generateProjectPrompt())
     session.setScaffolingRequirements(prompt)
-    //TODO (jns) hardcodeo
-    session.setScaffoldingSelectedLibraries(
-      SupportedLibraries.filter(
-        (library) =>
-          library.packageName === 'express' ||
-          library.packageName === 'fastify' ||
-          library.packageName === 'jest' ||
-          library.packageName === 'mongo'
-      )
+    const { libraries } = await this.sendChatCompletion(session, generateProjectPrompt(session.getScaffolding))
+    if (!libraries) {
+      throw new Error()
+    }
+    const selectedLibraries = SupportedLibraries.filter((supportedLibrary: LibraryDefinition) =>
+      libraries.some((name: string) => name === supportedLibrary.packageName)
     )
-    return message
+
+    if (selectedLibraries.length === 0) {
+      //TODO(jns) re-asking
+      throw new Error()
+    }
+    session.setScaffoldingSelectedLibraries(selectedLibraries)
+
+    const { answer } = await this.sendChatCompletion(session, sayGoodByePrompt())
+    return answer
   }
 
   async sendChatCompletion(session: Session, prompt: string): Promise<ChatCompletionResponse> {
