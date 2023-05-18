@@ -9,11 +9,33 @@ import { createPrompt } from '@quorum/elisma/src/domain/openai/ScaffoldingPrompt
 import { SupportedLibraries } from '@quorum/elisma/src/SupportedLibraries'
 import { Library } from '@quorum/elisma/src/domain/scaffolding/entities/Library'
 import { ChatCompletionResponse } from '@quorum/elisma/src/domain/openai/entities/ChatCompletionResponse'
+import { Optional } from '@quorum/elisma/src/infra/Optional'
+import { createProgramLangPrompt } from '@quorum/elisma/src/domain/openai/ScaffoldingProgramLang'
+import { RequestContextHolder } from '@quorum/elisma/src/infra/context/RequestContextHolder'
+import { ResourceNotFoundError } from '@quorum/elisma/src/infra/errors/genericHttpErrors/ResourceNotFoundError'
 
 const logger = createLogger('OpenAIService')
 
 export class OpenAIService {
   constructor(private readonly openAIClient: OpenAIClient, private readonly sessionService: SessionService) {}
+
+  async chat(prompt: string) {
+    const session = this.sessionService.getById(RequestContextHolder.getContext().sessionId)
+    if (!session) {
+      throw new ResourceNotFoundError()
+    }
+
+    let response
+    if (session.shouldAnswerLanguage()) {
+      response = await this.receiveLanguage(session, prompt)
+    } else if (session.shouldAnswerProjectName()) {
+      response = await this.receiveName(session, prompt)
+    } else if (session.shouldAnswerRequirements()) {
+      response = await this.receiveRequirements(session, prompt)
+    }
+    this.sessionService.update(session)
+    return response
+  }
 
   async receiveLanguage(session: Session, prompt: string) {
     const { answer, question: nextQuestion, message } = await this.sendChatCompletion(session, prompt)
@@ -96,5 +118,16 @@ export class OpenAIService {
 
         return [...libraries, ...candidates]
       }, [])
+  }
+
+  async askProgrammingLanguage(): Promise<Optional<string>> {
+    logger.info(`Asking programming language to the user...`)
+    const session = this.sessionService.getById(RequestContextHolder.getContext().sessionId)
+    if (!session) {
+      throw new ResourceNotFoundError()
+    }
+    const { question } = await this.sendChatCompletion(session, createProgramLangPrompt())
+    this.sessionService.update(session)
+    return question
   }
 }

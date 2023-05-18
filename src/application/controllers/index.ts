@@ -16,6 +16,7 @@ export function register(app: FastifyInstance, container: ApplicationContainer) 
   const openAIController: OpenAIController = container.cradle.openAIController
   app.post('/openai/completion', POST_OPENAI_OPTIONS, openAIController.sendCompletion.bind(openAIController))
   app.post('/openai/chat-completion', POST_OPENAI_OPTIONS, openAIController.chat.bind(openAIController))
+  app.get('/openai/ask-label', {}, openAIController.askProgrammingLanguage.bind(openAIController))
 
   const zipController: ZipController = container.cradle.zipController
   app.post('/zip', {}, zipController.generate.bind(zipController))

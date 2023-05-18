@@ -6,6 +6,7 @@ import { ChatResponse } from '@quorum/elisma/src/application/controllers/openai/
 import { RequestContextHolder } from '@quorum/elisma/src/infra/context/RequestContextHolder'
 import { ResourceNotFoundError } from '@quorum/elisma/src/infra/errors/genericHttpErrors/ResourceNotFoundError'
 import { SessionService } from '@quorum/elisma/src/domain/session/SessionService'
+import { FastifyRequest } from 'fastify/types/request'
 
 const logger = createLogger('OpenAIController')
 
@@ -36,5 +37,11 @@ export class OpenAIController {
       messageResponse = await this.openAIService.receiveRequirements(session, prompt)
     }
     return res.send(new ChatResponse(messageResponse, session.getScaffolding))
+  }
+
+  async askProgrammingLanguage(req: FastifyRequest, res: FastifyReply): Promise<void> {
+    logger.info(`Asking programming language to the user...`)
+    const response = await this.openAIService.askProgrammingLanguage()
+    return res.send(response)
   }
 }
