@@ -1,52 +1,108 @@
 import { OpenAIClient } from '@quorum/elisma/src/domain/openai/OpenAIClient'
 import { createLogger } from '@quorum/elisma/src/infra/log'
-import { RequestContextHolder } from '@quorum/elisma/src/infra/context/RequestContextHolder'
 import { Role } from '@quorum/elisma/src/domain/openai/entities/Role'
 import { SessionService } from '@quorum/elisma/src/domain/session/SessionService'
+import { Session } from '@quorum/elisma/src/domain/session/entities/Session'
+import {
+  generateProjectPrompt,
+  nameQuestionPrompt,
+  receiveLanguagePrompt,
+  receiveNamePrompt,
+  requirementsQuestionPrompt,
+} from '@quorum/elisma/src/domain/session/entities/Prompts'
 import { ResourceNotFoundError } from '@quorum/elisma/src/infra/errors/genericHttpErrors/ResourceNotFoundError'
-import { ChatCompletionResponseMessage } from 'openai'
 import { Optional } from '@quorum/elisma/src/infra/Optional'
 import { LibraryDefinition } from '@quorum/elisma/src/domain/bundle/entities/LibraryDefinition'
 import { createPrompt } from '@quorum/elisma/src/domain/openai/ScaffoldingPrompt'
 import { SupportedLibraries } from '@quorum/elisma/src/SupportedLibraries'
-import { createProgramLangPrompt } from './ScaffoldingProgramLang'
+import { ChatCompletionResponse } from '@quorum/elisma/src/domain/openai/entities/ChatCompletionResponse'
+import { createProgramLangPrompt } from '@quorum/elisma/src/domain/openai/ScaffoldingProgramLang'
+import { RequestContextHolder } from '@quorum/elisma/src/infra/context/RequestContextHolder'
+import { CompletionResponse } from '@quorum/elisma/src/domain/openai/entities/CompletionResponse'
+import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
 
 const logger = createLogger('OpenAIService')
 
 export class OpenAIService {
   constructor(private readonly openAIClient: OpenAIClient, private readonly sessionService: SessionService) {}
 
-  async sendCompletion(prompt: string) {
+  async receiveLanguage(session: Session, prompt: string) {
+    session.addChatMessage(Role.USER, receiveLanguagePrompt())
+    const { answer: selectedLanguage, message: firstMessage } = await this.sendChatCompletion(session, prompt)
+    const language = selectedLanguage as ProjectLanguage
+    if (!language) {
+      logger.info(`The user did not select the language`)
+      return firstMessage
+    }
+    session.setScaffolingLanguage(language)
+
+    const { question: nextQuestion, message: secondMessage } = await this.sendChatCompletion(
+      session,
+      nameQuestionPrompt(session.getScaffolding)
+    )
+    if (!nextQuestion) {
+      return secondMessage
+    }
+    return nextQuestion
+  }
+
+  async receiveName(session: Session, prompt: string) {
+    const { answer: projectName } = await this.sendCompletion(receiveNamePrompt(prompt))
+    if (!projectName) {
+      logger.info(`The user did not select the project name`)
+      throw new Error(projectName)
+    }
+    session.setScaffolingName(projectName)
+
+    const { question: nextQuestion, message: secondMessage } = await this.sendChatCompletion(
+      session,
+      requirementsQuestionPrompt(session.getScaffolding)
+    )
+
+    if (!nextQuestion) {
+      return secondMessage
+    }
+    return nextQuestion
+  }
+
+  async receiveRequirements(session: Session, prompt: string) {
+    session.addChatMessage(Role.USER, prompt) //adding this just in case
+    const { message } = await this.sendChatCompletion(session, generateProjectPrompt())
+    session.setScaffolingRequirements(prompt)
+    //TODO (jns) hardcodeo
+    session.setScaffoldingSelectedLibraries(
+      SupportedLibraries.filter(
+        (library) =>
+          library.packageName === 'express' ||
+          library.packageName === 'fastify' ||
+          library.packageName === 'jest' ||
+          library.packageName === 'mongo'
+      )
+    )
+    return message
+  }
+
+  async sendChatCompletion(session: Session, prompt: string): Promise<ChatCompletionResponse> {
+    logger.info(`Sending prompt ${prompt} to Open AI chat completion...`)
+    session.addChatMessage(Role.USER, prompt)
+    return await this.openAIClient.createChatCompletion(session.messages)
+  }
+
+  async sendCompletion(prompt: string): Promise<CompletionResponse> {
     logger.info(`Sending prompt to completion Open AI...`)
     return await this.openAIClient.createCompletion(prompt)
   }
 
-  async sendChatCompletion(prompt: string): Promise<Optional<ChatCompletionResponseMessage>> {
-    logger.info(`Sending prompt to chat completion Open AI...`)
-    const session = this.sessionService.getById(RequestContextHolder.getContext().sessionId)
-    if (!session) {
-      throw new ResourceNotFoundError()
-    }
-    session.addChatMessage(Role.USER, prompt)
-    const chatCompletionResponse = await this.openAIClient.createChatCompletion(session.messages)
-    const messageResponse = chatCompletionResponse.choices[0].message
-    if (messageResponse) {
-      session.addChatMessage(messageResponse.role as Role, messageResponse.content)
-    }
-    this.sessionService.update(session)
-    return messageResponse
-  }
-
-  async selectLibraries(projectRequirements: string): Promise<LibraryDefinition[]> {
+  async selectLibraries(session: Session, projectRequirements: string): Promise<LibraryDefinition[]> {
     const prompt = createPrompt(SupportedLibraries, projectRequirements)
-    const message = await this.sendChatCompletion(prompt)
+    const { message } = await this.sendChatCompletion(session, prompt)
     const urlRegex = /(https?:\/\/[^\s]+)/g
 
     if (!message) {
       throw new Error('no response from model')
     }
 
-    const lines = message.content.split('\n')
+    const lines = message.split('\n')
     if (!lines.length || !lines.some((line) => line.includes('->'))) {
       throw new Error('invalid response from model')
     }
@@ -71,20 +127,14 @@ export class OpenAIService {
       }, [])
   }
 
-  async askProgrammingLanguage(): Promise<Optional<ChatCompletionResponseMessage>> {
+  async askProgrammingLanguage(): Promise<Optional<string>> {
     logger.info(`Asking programming language to the user...`)
     const session = this.sessionService.getById(RequestContextHolder.getContext().sessionId)
     if (!session) {
       throw new ResourceNotFoundError()
     }
-    session.addChatMessage(Role.USER, createProgramLangPrompt())
-    const chatCompletionResponse = await this.openAIClient.createChatCompletion(session.messages)
-    const messageResponse = chatCompletionResponse.choices[0].message
-    if (messageResponse) {
-      session.addChatMessage(messageResponse.role as Role, messageResponse.content)
-    }
+    const { message } = await this.sendChatCompletion(session, createProgramLangPrompt())
     this.sessionService.update(session)
-    return messageResponse
+    return message
   }
-
 }

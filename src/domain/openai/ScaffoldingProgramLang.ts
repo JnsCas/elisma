@@ -4,8 +4,8 @@ export function createProgramLangPrompt(): string {
   return `
     I have the following list which includes programming languages.
     
-    ${Object.values(ProjectLanguage).join(' o ')}
+    ${Object.values(ProjectLanguage).join(' or ')}
     
-    Ask me wich programming languages I want to use from the previous list.
+    Ask me which programming languages I want to use from the previous list.
   `
 }

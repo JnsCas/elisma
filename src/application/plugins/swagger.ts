@@ -6,8 +6,8 @@ export default function (app: FastifyInstance) {
   app.register(fastifySwagger, {
     openapi: {
       info: {
-        title: 'Scraper Service API',
-        description: 'Service to manage the integration with the Scraper Actor in Apify.',
+        title: 'El IsmA API',
+        description: 'El IsmA',
         version: '1.0.0',
       },
     },

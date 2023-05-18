@@ -1,6 +1,6 @@
 import { FastifyRequest } from 'fastify'
 
-export type SendRequest = FastifyRequest<{
+export type PromptRequest = FastifyRequest<{
   Body: {
     prompt: string
   }
