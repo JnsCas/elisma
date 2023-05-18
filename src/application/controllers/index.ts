@@ -15,6 +15,7 @@ export function register(app: FastifyInstance, container: ApplicationContainer) 
   const openAIController: OpenAIController = container.cradle.openAIController
   app.post('/openai/completion', POST_OPENAI_OPTIONS, openAIController.sendCompletion.bind(openAIController))
   app.post('/openai/chat-completion', POST_OPENAI_OPTIONS, openAIController.chat.bind(openAIController))
+  app.get('/openai/ask-label', {}, openAIController.askProgrammingLanguage.bind(openAIController))
 }
 
 /** Registers all public endpoints.

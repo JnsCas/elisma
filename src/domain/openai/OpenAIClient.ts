@@ -20,7 +20,7 @@ export class OpenAIClient {
 
   async createChatCompletion(messages: ChatMessage[], model: Model = Model.GPT_3_5_TURBO): Promise<ChatResponse> {
     logger.info(`Sending messages to Open AI chat completion...`)
-    const { data } = await this.openAIApi.createChatCompletion({ model, messages, temperature: 2 })
+    const { data } = await this.openAIApi.createChatCompletion({ model, messages, temperature: 0.8 })
     logger.info(`The response content from Open AI is ${data.choices[0].message?.content}`)
     return ChatResponse.restore(data)
   }

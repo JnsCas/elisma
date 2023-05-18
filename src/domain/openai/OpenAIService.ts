@@ -11,6 +11,8 @@ import { createPrompt } from '@quorum/elisma/src/domain/openai/ScaffoldingPrompt
 import { SupportedLibraries } from '@quorum/elisma/src/SupportedLibraries'
 import { Library } from '@quorum/elisma/src/domain/scaffolding/entities/Library'
 import { ChatResponse } from '@quorum/elisma/src/domain/openai/entities/ChatResponse'
+import { Optional } from '@quorum/elisma/src/infra/Optional'
+import { createProgramLangPrompt } from '@quorum/elisma/src/domain/openai/ScaffoldingProgramLang'
 
 const logger = createLogger('OpenAIService')
 
@@ -31,6 +33,7 @@ export class OpenAIService {
     } else if (session.shouldAnswerRequirements()) {
       response = await this.receiveRequirements(session, prompt)
     }
+    this.sessionService.update(session)
     return response
   }
 
@@ -105,5 +108,16 @@ export class OpenAIService {
 
         return [...libraries, ...candidates]
       }, [])
+  }
+
+  async askProgrammingLanguage(): Promise<Optional<string>> {
+    logger.info(`Asking programming language to the user...`)
+    const session = this.sessionService.getById(RequestContextHolder.getContext().sessionId)
+    if (!session) {
+      throw new ResourceNotFoundError()
+    }
+    const { question } = await this.sendChatCompletion(session, createProgramLangPrompt())
+    this.sessionService.update(session)
+    return question
   }
 }
