@@ -3,7 +3,6 @@ import * as fs from 'fs/promises'
 import path from 'path'
 import { LibManifest } from '@quorum/elisma/src/domain/bundle/LibManifest'
 import Manifest from '@quorum/lib/fastify/manifest'
-import { BundleFile } from '@quorum/elisma/src/domain/bundle/entities/BundleFile'
 import { Bundle } from '@quorum/elisma/src/domain/bundle/entities/Bundle'
 import { CandidateFile } from '@quorum/elisma/src/domain/bundle/entities/CandidateFile'
 import { Project } from '@quorum/elisma/src/domain/bundle/Project'
@@ -76,7 +75,7 @@ export class BundleManager {
 
             try {
               await fs.stat(source)
-              return CandidateFile.create(manifest, BundleFile.include(source, target, file.filtered))
+              return CandidateFile.create(manifest, file.update(source, target))
             } catch (err: any) {
               throw new Error(`file or directory not found: ${source}`)
             }
@@ -97,19 +96,30 @@ export class BundleManager {
 
   private async copyFiles<T>(bundle: Bundle<T>, files: CandidateFile[]) {
     for (const file of files) {
-      await fs.mkdir(path.dirname(file.target), { recursive: true })
+      const stats = await fs.stat(file.source)
 
-      if (file.filtered) {
-        await fs.writeFile(file.target, await this.filterFile(bundle, file))
+      // Creates the target directory if it does not exist.
+      if (stats.isFile()) {
+        await fs.mkdir(path.dirname(file.target), { recursive: true })
+      } else if (stats.isDirectory()) {
+        await fs.mkdir(file.target, { recursive: true })
+      }
+
+      if (stats.isFile()) {
+        if (file.filtered) {
+          await fs.writeFile(file.target, await this.filterFile(bundle, file.source))
+        } else {
+          await fs.cp(file.source, file.target, { recursive: true })
+        }
       } else {
-        // TODO(nyx): filter files recursively
-        await fs.cp(file.source, file.target, { recursive: true })
+        await this.filterDirectory(bundle, file)
+        // await fs.cp(file.source, file.target, { recursive: true })
       }
     }
   }
 
-  async filterFile<T>(bundle: Bundle<T>, file: CandidateFile): Promise<string> {
-    const content = (await fs.readFile(file.source)).toString()
+  private async filterFile<T>(bundle: Bundle<T>, file: string): Promise<string> {
+    const content = (await fs.readFile(file)).toString()
     let normalizedName: string = bundle.project.name
 
     if (!bundle.project.name.endsWith('/')) {
@@ -117,5 +127,27 @@ export class BundleManager {
     }
 
     return content.replaceAll(/@quorum\/lib\/\w+\//gi, normalizedName)
+  }
+
+  async filterDirectory(bundle: Bundle<any>, dataDir: CandidateFile) {
+    // traverse the directory tree using a queue to avoid recursion.
+    const queue: string[] = await fs.readdir(dataDir.source)
+
+    while (queue.length) {
+      const current = queue.shift() as string
+      const absolutePath = path.join(dataDir.source, current)
+      const stats = await fs.stat(absolutePath)
+
+      if (stats.isDirectory()) {
+        const nextFiles = (await fs.readdir(absolutePath)).map((file) => `${current}/${file}`)
+        queue.push(...nextFiles)
+      } else {
+        const content = await this.filterFile(bundle, path.join(dataDir.source, current))
+        const targetFile = path.join(dataDir.target, current)
+
+        await fs.mkdir(path.dirname(targetFile), { recursive: true })
+        await fs.writeFile(targetFile, content)
+      }
+    }
   }
 }
