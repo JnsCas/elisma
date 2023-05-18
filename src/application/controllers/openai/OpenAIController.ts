@@ -36,6 +36,7 @@ export class OpenAIController {
     } else if (session.shouldAnswerRequirements()) {
       messageResponse = await this.openAIService.receiveRequirements(session, prompt)
     }
+    this.sessionService.update(session)
     return res.send(new ChatResponse(messageResponse, session.getScaffolding))
   }
 

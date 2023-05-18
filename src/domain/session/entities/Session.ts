@@ -1,10 +1,9 @@
 import { IdManager } from '@quorum/elisma/src/infra/IdManager'
 import { ChatMessage } from '@quorum/elisma/src/domain/openai/entities/ChatMessage'
 import { Role } from '@quorum/elisma/src/domain/openai/entities/Role'
-import { firstPrompt } from '@quorum/elisma/src/domain/session/entities/Prompts'
 import { Scaffolding } from '@quorum/elisma/src/domain/scaffolding/entities/Scaffolding'
-import { Language } from '@quorum/elisma/src/domain/scaffolding/entities/Language'
 import { Library } from '@quorum/elisma/src/domain/scaffolding/entities/Library'
+import { ProjectLanguage } from '@quorum/elisma/src/domain/scaffolding/entities/ProjectLanguage'
 
 export class Session {
   private scaffolding: Scaffolding
@@ -14,7 +13,7 @@ export class Session {
   }
 
   static create(): Session {
-    return new Session(IdManager.randomId(), [new ChatMessage(Role.USER, firstPrompt())])
+    return new Session(IdManager.randomId(), [])
   }
 
   addChatMessage(role: Role, message: string): Session {
@@ -22,7 +21,7 @@ export class Session {
     return this
   }
 
-  setScaffolingLanguage(language: Language) {
+  setScaffolingLanguage(language: ProjectLanguage) {
     this.scaffolding.setLanguage(language)
   }
 

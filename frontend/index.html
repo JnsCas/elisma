@@ -14,21 +14,35 @@
       'command line interface': 'Command Line Interface'
     }
 
+    const doFirstQuestion = (sessionId) => {
+      $.ajax({
+        url: "http://localhost:9000/api/v1/openai/ask-label",
+        type: "GET",
+        headers: {
+          'x-session-id': sessionId
+        },
+        success: function(response) {
+          $("#elismaResponseTextArea").val(response);
+          $("#talkButton").prop("disabled", false);
+        },
+        error: function(xhr) {
+          $("#elismaResponseTextArea").val("Error");
+        }
+      });
+    }
+
     let sessionId
     $(document).ready(function() {
-      $("#createSessionButton").click(function() {
-        $.ajax({
-          url: "http://localhost:9000/api/v1/sessions",
-          type: "POST",
-          success: function(response) {
-            sessionId = response.id
-            $("#createSessionResponseTextArea").val(sessionId);
-            $("#talkButton").prop("disabled", false);
-          },
-          error: function(xhr) {
-            $("#createSessionResponseTextArea").val("Error");
-          }
-        });
+      $.ajax({
+        url: "http://localhost:9000/api/v1/sessions",
+        type: "POST",
+        success: function(response) {
+          sessionId = response.id
+          doFirstQuestion(sessionId)
+        },
+        error: function(xhr) {
+          alert('Error');
+        }
       });
 
       $("#talkButton").click(function() {
@@ -104,12 +118,10 @@
           },
           contentType: "application/json",
           success: (response) => {
-            sessionId = response.id
-            $("#createSessionResponseTextArea").val(sessionId);
-            $("#talkButton").prop("disabled", false);
+            //TODO
           },
           error: (xhr) => {
-            $("#createSessionResponseTextArea").val("Error");
+            alert('Error')
           }
         });
       });
@@ -119,11 +131,6 @@
 <body>
   <div class="content">
     <h1>El IsmA</h1>
-    <button id="createSessionButton">Create Session</button>
-    <br>
-    <textarea id="createSessionResponseTextArea" rows="1" cols="50" readonly></textarea>
-    <br>
-    <h2>Talk to elisma</h2>
     <textarea id="elismaResponseTextArea" rows="10" cols="50" readonly></textarea>
     <br>
     <input type="text" id="myInput">

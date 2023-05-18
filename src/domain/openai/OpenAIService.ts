@@ -3,8 +3,14 @@ import { createLogger } from '@quorum/elisma/src/infra/log'
 import { Role } from '@quorum/elisma/src/domain/openai/entities/Role'
 import { SessionService } from '@quorum/elisma/src/domain/session/SessionService'
 import { Session } from '@quorum/elisma/src/domain/session/entities/Session'
-import { Language } from '@quorum/elisma/src/domain/scaffolding/entities/Language'
-import { generateProjectPrompt } from '@quorum/elisma/src/domain/session/entities/Prompts'
+import { ProjectLanguage } from '@quorum/elisma/src/domain/scaffolding/entities/ProjectLanguage'
+import {
+  nameQuestionPrompt,
+  generateProjectPrompt,
+  receiveLanguagePrompt,
+  receiveNamePrompt,
+  requirementsQuestionPrompt,
+} from '@quorum/elisma/src/domain/session/entities/Prompts'
 import { createPrompt } from '@quorum/elisma/src/domain/openai/ScaffoldingPrompt'
 import { SupportedLibraries } from '@quorum/elisma/src/SupportedLibraries'
 import { Library } from '@quorum/elisma/src/domain/scaffolding/entities/Library'
@@ -13,50 +19,71 @@ import { Optional } from '@quorum/elisma/src/infra/Optional'
 import { createProgramLangPrompt } from '@quorum/elisma/src/domain/openai/ScaffoldingProgramLang'
 import { RequestContextHolder } from '@quorum/elisma/src/infra/context/RequestContextHolder'
 import { ResourceNotFoundError } from '@quorum/elisma/src/infra/errors/genericHttpErrors/ResourceNotFoundError'
+import { CompletionResponse } from '@quorum/elisma/src/domain/openai/entities/CompletionResponse'
 
 const logger = createLogger('OpenAIService')
 
 export class OpenAIService {
   constructor(private readonly openAIClient: OpenAIClient, private readonly sessionService: SessionService) {}
 
-  async chat(prompt: string) {
-    const session = this.sessionService.getById(RequestContextHolder.getContext().sessionId)
-    if (!session) {
-      throw new ResourceNotFoundError()
-    }
-
-    let response
-    if (session.shouldAnswerLanguage()) {
-      response = await this.receiveLanguage(session, prompt)
-    } else if (session.shouldAnswerProjectName()) {
-      response = await this.receiveName(session, prompt)
-    } else if (session.shouldAnswerRequirements()) {
-      response = await this.receiveRequirements(session, prompt)
-    }
-    this.sessionService.update(session)
-    return response
-  }
-
   async receiveLanguage(session: Session, prompt: string) {
-    const { answer, question: nextQuestion, message } = await this.sendChatCompletion(session, prompt)
-    const language = answer as Language
+    session.addChatMessage(Role.USER, receiveLanguagePrompt())
+    const { answer: selectedLanguage, message: firstMessage } = await this.sendChatCompletion(session, prompt)
+    const language = selectedLanguage as ProjectLanguage
     if (!language) {
       logger.info(`The user did not select the language`)
-      return message
+      return firstMessage
     }
     session.setScaffolingLanguage(language)
+
+    const { question: nextQuestion, message: secondMessage } = await this.sendChatCompletion(
+      session,
+      nameQuestionPrompt(session.getScaffolding)
+    )
+    if (!nextQuestion) {
+      return secondMessage
+    }
     return nextQuestion
   }
 
   async receiveName(session: Session, prompt: string) {
-    const { answer: projectName, question: nextQuestion, message } = await this.sendChatCompletion(session, prompt)
+    const { answer: projectName } = await this.sendCompletion(receiveNamePrompt(prompt))
     if (!projectName) {
       logger.info(`The user did not select the project name`)
-      return message
+      throw new Error(projectName)
     }
     session.setScaffolingName(projectName)
+
+    const { question: nextQuestion, message: secondMessage } = await this.sendChatCompletion(
+      session,
+      requirementsQuestionPrompt(session.getScaffolding)
+    )
+
+    if (!nextQuestion) {
+      return secondMessage
+    }
     return nextQuestion
   }
+
+  /*async receiveName(session: Session, prompt: string) {
+    session.addChatMessage(Role.USER, receiveNamePrompt())
+    const { answer: projectName, message: firstMessage } = await this.sendChatCompletion(session, prompt)
+    if (!projectName) {
+      logger.info(`The user did not select the project name`)
+      return firstMessage
+    }
+    session.setScaffolingName(projectName)
+
+    const { question: nextQuestion, message: secondMessage } = await this.sendChatCompletion(
+      session,
+      requirementsQuestionPrompt(session.getScaffolding)
+    )
+
+    if (!nextQuestion) {
+      return secondMessage
+    }
+    return nextQuestion
+  }*/
 
   async receiveRequirements(session: Session, prompt: string) {
     session.addChatMessage(Role.USER, prompt) //adding this just in case
@@ -81,7 +108,7 @@ export class OpenAIService {
     return await this.openAIClient.createChatCompletion(session.messages)
   }
 
-  async sendCompletion(prompt: string) {
+  async sendCompletion(prompt: string): Promise<CompletionResponse> {
     logger.info(`Sending prompt to completion Open AI...`)
     return await this.openAIClient.createCompletion(prompt)
   }
@@ -126,8 +153,8 @@ export class OpenAIService {
     if (!session) {
       throw new ResourceNotFoundError()
     }
-    const { question } = await this.sendChatCompletion(session, createProgramLangPrompt())
+    const { message } = await this.sendChatCompletion(session, createProgramLangPrompt())
     this.sessionService.update(session)
-    return question
+    return message
   }
 }

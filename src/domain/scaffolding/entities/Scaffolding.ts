@@ -1,8 +1,8 @@
-import { Language } from '@quorum/elisma/src/domain/scaffolding/entities/Language'
 import { Library } from '@quorum/elisma/src/domain/scaffolding/entities/Library'
+import { ProjectLanguage } from '@quorum/elisma/src/domain/scaffolding/entities/ProjectLanguage'
 
 export class Scaffolding {
-  private language?: Language
+  private language?: ProjectLanguage
   private name?: string
   private requirements?: string
   private selectedLibraries: Library[]
@@ -14,7 +14,7 @@ export class Scaffolding {
     this.selectedLibraries = []
   }
 
-  setLanguage(language: Language): Scaffolding {
+  setLanguage(language: ProjectLanguage): Scaffolding {
     this.language = language
     return this
   }
@@ -44,5 +44,13 @@ export class Scaffolding {
 
   requirementsIsEmpty(): boolean {
     return this.requirements === undefined
+  }
+
+  get getLanguage() {
+    return this.language
+  }
+
+  get getName() {
+    return this.name
   }
 }
