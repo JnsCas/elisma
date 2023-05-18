@@ -1,11 +1,11 @@
 export const PING_OPTIONS = {
   schema: {
-    description: 'Simple echo endpoint',
-    query: {
+    description: 'Process run results',
+    querystring: {
       type: 'object',
       required: ['message'],
       properties: {
-        prompt: { type: 'message', minLength: 1 },
+        message: { type: 'string' },
       },
     },
   },

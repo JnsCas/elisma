@@ -22,6 +22,6 @@ export class CandidateFile {
   }
 
   get filtered(): boolean {
-    return this.file.filtered
+    return this.file.mustFilter
   }
 }

@@ -36,6 +36,7 @@ export default class Manifest extends LibManifest {
       '*.{js,cjs,ts}': 'eslint --cache --fix',
       '*.{css,md}': 'prettier --write',
     }
+    project.metadata.scripts['start'] = 'ts-node-dev -r tsconfig-paths/register src/index.ts'
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -50,7 +51,7 @@ export default class Manifest extends LibManifest {
 
     return [
       ...baseFiles,
-      BundleFile.include('./config/tsconfig.json', './tsconfig.json', true),
+      BundleFile.include('./config/tsconfig.json', './tsconfig.json').filtered(),
       BundleFile.include('./src/infra/bootstrap.ts'),
       BundleFile.include('./src/index.ts'),
     ]
