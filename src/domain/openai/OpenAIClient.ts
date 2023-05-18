@@ -24,4 +24,13 @@ export class OpenAIClient {
     const { data } = await this.openAIApi.createChatCompletion({ model, messages })
     return data
   }
+
+  async askProgrammingLanguage(
+    messages: ChatMessage[],
+    model: Model = Model.GPT_3_5_TURBO
+  ): Promise<CreateChatCompletionResponse> {
+    const { data } = await this.openAIApi.createChatCompletion({ model, messages })
+    return data
+  }
+
 }
