@@ -1,5 +1,5 @@
-import { ApplicationRegistry } from '@quorum/elisma/src/infra/bootstrap'
-import { createLogger } from '@quorum/elisma/src/infra/log'
+import { ApplicationRegistry } from '@quorum/lib/elisma/src/infra/bootstrap'
+import { createLogger } from '@quorum/lib/pino/src/infra/log'
 
 const logger = createLogger('bootstrap:init')
 

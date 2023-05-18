@@ -6,7 +6,7 @@ import { SessionService } from '@quorum/elisma/src/domain/session/SessionService
 import { ResourceNotFoundError } from '@quorum/elisma/src/infra/errors/genericHttpErrors/ResourceNotFoundError'
 import { ChatCompletionResponseMessage } from 'openai'
 import { Optional } from '@quorum/elisma/src/infra/Optional'
-import { Library } from '@quorum/elisma/src/domain/scaffolding/entities/Library'
+import { LibraryDefinition } from '@quorum/elisma/src/domain/bundle/entities/LibraryDefinition'
 import { createPrompt } from '@quorum/elisma/src/domain/openai/ScaffoldingPrompt'
 import { SupportedLibraries } from '@quorum/elisma/src/SupportedLibraries'
 import { createProgramLangPrompt } from './ScaffoldingProgramLang'
@@ -37,7 +37,7 @@ export class OpenAIService {
     return messageResponse
   }
 
-  async selectLibraries(projectRequirements: string): Promise<Library[]> {
+  async selectLibraries(projectRequirements: string): Promise<LibraryDefinition[]> {
     const prompt = createPrompt(SupportedLibraries, projectRequirements)
     const message = await this.sendChatCompletion(prompt)
     const urlRegex = /(https?:\/\/[^\s]+)/g
@@ -54,14 +54,14 @@ export class OpenAIService {
     return lines
       .map((line) => line.trim())
       .filter((line) => line.includes('->'))
-      .reduce((libraries: Library[], line) => {
+      .reduce((libraries: LibraryDefinition[], line) => {
         const fields = line.split('->')
         const category = fields[0]?.trim()
         const urls = fields[1]?.trim()?.match(urlRegex) || []
         const candidates = urls.map((url) => {
           const candidate = SupportedLibraries.find((library) => library.url === url)
           if (!candidate) {
-            return Library.create(url, category, url)
+            return LibraryDefinition.create(url, category, url)
           } else {
             return candidate
           }
@@ -70,7 +70,7 @@ export class OpenAIService {
         return [...libraries, ...candidates]
       }, [])
   }
-  
+
   async askProgrammingLanguage(): Promise<Optional<ChatCompletionResponseMessage>> {
     logger.info(`Asking programming language to the user...`)
     const session = this.sessionService.getById(RequestContextHolder.getContext().sessionId)

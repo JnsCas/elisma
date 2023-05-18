@@ -1,0 +1,11 @@
+{
+  "name": "@quorum/lib",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {},
+  "license": "GPL-2.0",
+  "dependencies": {
+  },
+  "devDependencies": {
+  }
+}

@@ -1,4 +1,4 @@
-import { ApplicationContainer } from '@quorum/elisma/src/infra/bootstrap'
+import { ApplicationContainer, ApplicationRegistry } from '@quorum/elisma/src/infra/bootstrap'
 import { openAIConfig } from '@quorum/elisma/src/config'
 import { asClass, asFunction } from 'awilix'
 import { Configuration, OpenAIApi } from 'openai'
@@ -31,10 +31,10 @@ function initServices() {
   }
 }
 
-export async function registerDomain(container: ApplicationContainer) {
+ApplicationRegistry.register(async function registerDomain(container: ApplicationContainer) {
   container.register({
     ...initRepositories(),
     ...initClients(),
     ...initServices(),
   })
-}
+})
