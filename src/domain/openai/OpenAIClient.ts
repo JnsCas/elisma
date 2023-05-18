@@ -1,4 +1,4 @@
-import { CreateCompletionResponse, OpenAIApi } from 'openai'
+import { OpenAIApi } from 'openai'
 import { Model } from '@quorum/elisma/src/domain/openai/entities/Model'
 import { createLogger } from '@quorum/elisma/src/infra/log'
 import { ChatMessage } from '@quorum/elisma/src/domain/openai/entities/ChatMessage'
