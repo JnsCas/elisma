@@ -2,7 +2,7 @@ import { CreateCompletionResponse, OpenAIApi } from 'openai'
 import { Model } from '@quorum/elisma/src/domain/openai/entities/Model'
 import { createLogger } from '@quorum/elisma/src/infra/log'
 import { ChatMessage } from '@quorum/elisma/src/domain/openai/entities/ChatMessage'
-import { ChatResponse } from '@quorum/elisma/src/domain/openai/entities/ChatResponse'
+import { ChatCompletionResponse } from '@quorum/elisma/src/domain/openai/entities/ChatCompletionResponse'
 
 const logger = createLogger('OpenAIClient')
 
@@ -18,10 +18,13 @@ export class OpenAIClient {
     return data
   }
 
-  async createChatCompletion(messages: ChatMessage[], model: Model = Model.GPT_3_5_TURBO): Promise<ChatResponse> {
+  async createChatCompletion(
+    messages: ChatMessage[],
+    model: Model = Model.GPT_3_5_TURBO
+  ): Promise<ChatCompletionResponse> {
     logger.info(`Sending messages to Open AI chat completion...`)
     const { data } = await this.openAIApi.createChatCompletion({ model, messages, temperature: 0.8 })
     logger.info(`The response content from Open AI is ${data.choices[0].message?.content}`)
-    return ChatResponse.restore(data)
+    return ChatCompletionResponse.restore(data)
   }
 }
