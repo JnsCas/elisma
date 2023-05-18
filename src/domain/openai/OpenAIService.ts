@@ -65,26 +65,6 @@ export class OpenAIService {
     return nextQuestion
   }
 
-  /*async receiveName(session: Session, prompt: string) {
-    session.addChatMessage(Role.USER, receiveNamePrompt())
-    const { answer: projectName, message: firstMessage } = await this.sendChatCompletion(session, prompt)
-    if (!projectName) {
-      logger.info(`The user did not select the project name`)
-      return firstMessage
-    }
-    session.setScaffolingName(projectName)
-
-    const { question: nextQuestion, message: secondMessage } = await this.sendChatCompletion(
-      session,
-      requirementsQuestionPrompt(session.getScaffolding)
-    )
-
-    if (!nextQuestion) {
-      return secondMessage
-    }
-    return nextQuestion
-  }*/
-
   async receiveRequirements(session: Session, prompt: string) {
     session.addChatMessage(Role.USER, prompt) //adding this just in case
     const { message } = await this.sendChatCompletion(session, generateProjectPrompt())
