@@ -5,6 +5,7 @@ import { HEALTH_CHECK_OPTIONS } from '@quorum/elisma/src/application/controllers
 import { SessionController } from '@quorum/elisma/src/application/controllers/session/SessionController'
 import { OpenAIController } from '@quorum/elisma/src/application/controllers/openai/OpenAIController'
 import { POST_OPENAI_OPTIONS } from '@quorum/elisma/src/application/controllers/openai/schemas'
+import { ZipController } from '@quorum/elisma/src/application/controllers/zip/ZipController'
 
 /** Registers all restricted endpoints.
  * Public endpoints require authentication.
@@ -15,6 +16,9 @@ export function register(app: FastifyInstance, container: ApplicationContainer) 
   const openAIController: OpenAIController = container.cradle.openAIController
   app.post('/openai/completion', POST_OPENAI_OPTIONS, openAIController.sendCompletion.bind(openAIController))
   app.post('/openai/chat-completion', POST_OPENAI_OPTIONS, openAIController.chat.bind(openAIController))
+
+  const zipController: ZipController = container.cradle.zipController
+  app.post('/zip', {}, zipController.generate.bind(zipController))
 }
 
 /** Registers all public endpoints.

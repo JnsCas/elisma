@@ -1,38 +1,19 @@
 import { OpenAIClient } from '@quorum/elisma/src/domain/openai/OpenAIClient'
 import { createLogger } from '@quorum/elisma/src/infra/log'
-import { RequestContextHolder } from '@quorum/elisma/src/infra/context/RequestContextHolder'
 import { Role } from '@quorum/elisma/src/domain/openai/entities/Role'
 import { SessionService } from '@quorum/elisma/src/domain/session/SessionService'
-import { ResourceNotFoundError } from '@quorum/elisma/src/infra/errors/genericHttpErrors/ResourceNotFoundError'
 import { Session } from '@quorum/elisma/src/domain/session/entities/Session'
 import { Language } from '@quorum/elisma/src/domain/scaffolding/entities/Language'
 import { generateProjectPrompt } from '@quorum/elisma/src/domain/session/entities/Prompts'
 import { createPrompt } from '@quorum/elisma/src/domain/openai/ScaffoldingPrompt'
 import { SupportedLibraries } from '@quorum/elisma/src/SupportedLibraries'
 import { Library } from '@quorum/elisma/src/domain/scaffolding/entities/Library'
-import { ChatResponse } from '@quorum/elisma/src/domain/openai/entities/ChatResponse'
+import { ChatCompletionResponse } from '@quorum/elisma/src/domain/openai/entities/ChatCompletionResponse'
 
 const logger = createLogger('OpenAIService')
 
 export class OpenAIService {
   constructor(private readonly openAIClient: OpenAIClient, private readonly sessionService: SessionService) {}
-
-  async chat(prompt: string) {
-    const session = this.sessionService.getById(RequestContextHolder.getContext().sessionId)
-    if (!session) {
-      throw new ResourceNotFoundError()
-    }
-
-    let response
-    if (session.shouldAnswerLanguage()) {
-      response = await this.receiveLanguage(session, prompt)
-    } else if (session.shouldAnswerProjectName()) {
-      response = await this.receiveName(session, prompt)
-    } else if (session.shouldAnswerRequirements()) {
-      response = await this.receiveRequirements(session, prompt)
-    }
-    return response
-  }
 
   async receiveLanguage(session: Session, prompt: string) {
     const { answer, question: nextQuestion, message } = await this.sendChatCompletion(session, prompt)
@@ -59,10 +40,20 @@ export class OpenAIService {
     session.addChatMessage(Role.USER, prompt) //adding this just in case
     const { message } = await this.sendChatCompletion(session, generateProjectPrompt())
     session.setScaffolingRequirements(prompt)
+    //TODO (jns) hardcodeo
+    session.setScaffoldingSelectedLibraries(
+      SupportedLibraries.filter(
+        (library) =>
+          library.packageName === 'express' ||
+          library.packageName === 'fastify' ||
+          library.packageName === 'jest' ||
+          library.packageName === 'mongo'
+      )
+    )
     return message
   }
 
-  async sendChatCompletion(session: Session, prompt: string): Promise<ChatResponse> {
+  async sendChatCompletion(session: Session, prompt: string): Promise<ChatCompletionResponse> {
     logger.info(`Sending prompt ${prompt} to Open AI chat completion...`)
     session.addChatMessage(Role.USER, prompt)
     return await this.openAIClient.createChatCompletion(session.messages)

@@ -1,13 +1,13 @@
-export class ChatResponse {
+export class ChatCompletionResponse {
   private constructor(readonly answer?: string, readonly question?: string, readonly message?: string) {}
 
-  static restore(response: any): ChatResponse {
+  static restore(response: any): ChatCompletionResponse {
     const content = response.choices[0].message.content
     try {
       const jsonContent = JSON.parse(content)
-      return new ChatResponse(jsonContent.answer, jsonContent.question)
+      return new ChatCompletionResponse(jsonContent.answer, jsonContent.question)
     } catch (e) {
-      return new ChatResponse(undefined, undefined, content)
+      return new ChatCompletionResponse(undefined, undefined, content)
     }
   }
 }

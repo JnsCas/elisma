@@ -4,6 +4,7 @@ import { Role } from '@quorum/elisma/src/domain/openai/entities/Role'
 import { firstPrompt } from '@quorum/elisma/src/domain/session/entities/Prompts'
 import { Scaffolding } from '@quorum/elisma/src/domain/scaffolding/entities/Scaffolding'
 import { Language } from '@quorum/elisma/src/domain/scaffolding/entities/Language'
+import { Library } from '@quorum/elisma/src/domain/scaffolding/entities/Library'
 
 export class Session {
   private scaffolding: Scaffolding
@@ -33,6 +34,10 @@ export class Session {
     this.scaffolding.setRequirements(requirements)
   }
 
+  setScaffoldingSelectedLibraries(libraries: Library[]) {
+    this.scaffolding.setSelectedLibraries(libraries)
+  }
+
   shouldAnswerLanguage(): boolean {
     return this.scaffolding.languageIsEmpty()
   }
@@ -43,5 +48,9 @@ export class Session {
 
   shouldAnswerRequirements(): boolean {
     return this.scaffolding.requirementsIsEmpty()
+  }
+
+  get getScaffolding(): Scaffolding {
+    return this.scaffolding
   }
 }
