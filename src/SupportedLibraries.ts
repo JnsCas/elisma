@@ -1,9 +1,12 @@
 import { LibraryDefinition } from '@quorum/elisma/src/domain/bundle/entities/LibraryDefinition'
 
 export const SupportedLibraries: LibraryDefinition[] = [
+  LibraryDefinition.create('express', 'web framework', 'https://www.npmjs.com/package/express'),
   LibraryDefinition.create('fastify', 'web framework', 'https://www.npmjs.com/package/fastify'),
   LibraryDefinition.create('jest', 'test framework', 'https://www.npmjs.com/package/jest'),
+  LibraryDefinition.create('mocha', 'test framework', 'https://www.npmjs.com/package/mocha'),
   LibraryDefinition.create('pino', 'logger', 'https://www.npmjs.com/package/pino'),
+  LibraryDefinition.create('winston', 'logger', 'https://www.npmjs.com/package/winston'),
   LibraryDefinition.create('postgres', 'database driver', 'https://www.npmjs.com/package/pg'),
   LibraryDefinition.create('sqlite', 'database driver', 'https://www.npmjs.com/package/sqlite3'),
   LibraryDefinition.create('mysql', 'database driver', 'https://www.npmjs.com/package/mysql'),

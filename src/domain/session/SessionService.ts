@@ -9,7 +9,7 @@ const logger = createLogger('SessionService')
 export class SessionService {
   constructor(private readonly sessionRepository: SessionRepository) {}
 
-  create() {
+  create(): Session {
     logger.info(`Creating session...`)
     const session = Session.create()
     this.sessionRepository.save(session)
