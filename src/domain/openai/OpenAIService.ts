@@ -44,7 +44,10 @@ export class OpenAIService {
   async receiveLanguage(session: Session, prompt: string) {
     session.addChatMessage(Role.USER, receiveLanguagePrompt())
     const { answer } = await this.sendChatCompletion(session, prompt)
-    if (answer && !this.isValidLanguage(answer)) {
+    if (!answer) {
+      throw new Error()
+    }
+    if (!this.isValidLanguage(answer)) {
       const { answer } = await this.sendChatCompletion(session, retryProgramLangPrompt(prompt))
       return answer
     }
@@ -59,7 +62,7 @@ export class OpenAIService {
   }
 
   async receiveName(session: Session, prompt: string) {
-    const { answer: projectName } = await this.sendCompletion(receiveNamePrompt(prompt))
+    const { answer: projectName } = await this.sendChatCompletion(session, receiveNamePrompt(prompt))
     if (!projectName) {
       logger.info(`The user did not select the project name`)
       throw new Error(projectName)
@@ -85,8 +88,8 @@ export class OpenAIService {
     )
 
     if (selectedLibraries.length === 0) {
-      //TODO(jns) re-asking
-      throw new Error()
+      logger.info(`Selecting all the libraries as default...`)
+      selectedLibraries.push(...SupportedLibraries)
     }
     session.setScaffoldingSelectedLibraries(selectedLibraries)
 
@@ -120,6 +123,6 @@ export class OpenAIService {
   }
 
   private isValidLanguage(language: string): boolean {
-    return Object.values(ProjectLanguage).includes(language as ProjectLanguage)
+    return Object.values(ProjectLanguage).includes(language.toLowerCase() as ProjectLanguage)
   }
 }
