@@ -26,4 +26,12 @@ export class Bundle<DependencyType> {
   get zipFileName(): string {
     return `${this.project.name}.zip`
   }
+
+  hasLib(name: string): boolean {
+    return this.libs.some((library) => library.packageName === name)
+  }
+
+  hasLibCategory(category: string): boolean {
+    return this.libs.some((library) => library.category === category)
+  }
 }

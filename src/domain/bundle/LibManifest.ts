@@ -1,5 +1,4 @@
 import { Bundle } from '@quorum/elisma/src/domain/bundle/entities/Bundle'
-import { BundleFile } from '@quorum/elisma/src/domain/bundle/entities/BundleFile'
 import { ManifestConfig } from '@quorum/elisma/src/domain/bundle/ManifestConfig'
 import { Project } from '@quorum/elisma/src/domain/bundle/Project'
 
@@ -11,5 +10,5 @@ export abstract class LibManifest {
     return Promise.resolve()
   }
 
-  abstract files<T extends NonNullable<unknown>>(bundle: Bundle<T>): Promise<BundleFile[]>
+  abstract prepare<T extends NonNullable<unknown>>(bundle: Bundle<T>): Promise<void>
 }

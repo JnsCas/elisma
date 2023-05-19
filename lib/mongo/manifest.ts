@@ -17,8 +17,9 @@ export default class Manifest extends LibManifest {
     project.addDependencies(NpmDependency.runtime('mongoose', '^6.8.3'))
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async files(bundle: Bundle<NonNullable<unknown>>): Promise<BundleFile[]> {
-    return [BundleFile.include('./src/infra/db/mongo'), BundleFile.include('./src/bootstrap/mongo.ts')]
+  async prepare(bundle: Bundle<NonNullable<unknown>>): Promise<void> {
+    bundle.addFiles(
+      ...[BundleFile.include(this, './src/infra/db/mongo'), BundleFile.include(this, './src/bootstrap/mongo.ts')]
+    )
   }
 }

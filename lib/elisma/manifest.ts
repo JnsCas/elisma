@@ -41,23 +41,21 @@ export default class Manifest extends LibManifest {
     project.metadata.scripts['start'] = 'ts-node-dev -r tsconfig-paths/register src/index.ts'
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async files(bundle: Bundle<NonNullable<unknown>>): Promise<BundleFile[]> {
-    const baseFiles = []
-
+  async prepare(bundle: Bundle<any>): Promise<void> {
     if (bundle.project.language === ProjectLanguage.TYPESCRIPT) {
-      baseFiles.push(BundleFile.include('./config/.eslintrc.typescript.cjs', './.eslintrc.cjs'))
+      bundle.addFiles(BundleFile.include(this, './config/.eslintrc.typescript.cjs', './.eslintrc.cjs'))
     } else if (bundle.project.language === ProjectLanguage.JAVASCRIPT) {
-      baseFiles.push(BundleFile.include('./config/.eslintrc.javascript.cjs', './.eslintrc.cjs'))
+      bundle.addFiles(BundleFile.include(this, './config/.eslintrc.javascript.cjs', './.eslintrc.cjs'))
     }
 
-    return [
-      ...baseFiles,
-      BundleFile.include('./config/tsconfig.json', './tsconfig.json').filtered(),
-      BundleFile.include('./src/infra/bootstrap.ts'),
-      BundleFile.include('./src/infra/configUtils.ts'),
-      BundleFile.include('./src/infra/Optional.ts'),
-      BundleFile.include('./src/index.ts'),
-    ]
+    bundle.addFiles(
+      ...[
+        BundleFile.include(this, './config/tsconfig.json', './tsconfig.json').filtered(),
+        BundleFile.include(this, './src/infra/bootstrap.ts'),
+        BundleFile.include(this, './src/infra/configUtils.ts'),
+        BundleFile.include(this, './src/infra/Optional.ts'),
+        BundleFile.include(this, './src/index.ts'),
+      ]
+    )
   }
 }

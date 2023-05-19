@@ -8,8 +8,6 @@ export const SupportedLibraries: LibraryDefinition[] = [
   LibraryDefinition.create('pino', 'logger', 'https://www.npmjs.com/package/pino'),
   LibraryDefinition.create('winston', 'logger', 'https://www.npmjs.com/package/winston'),
   LibraryDefinition.create('postgres', 'database driver', 'https://www.npmjs.com/package/pg'),
-  LibraryDefinition.create('sqlite', 'database driver', 'https://www.npmjs.com/package/sqlite3'),
-  LibraryDefinition.create('mysql', 'database driver', 'https://www.npmjs.com/package/mysql'),
   LibraryDefinition.create('mongo', 'database driver', 'https://www.npmjs.com/package/mongodb'),
   LibraryDefinition.create('commander', 'command line interface', 'https://www.npmjs.com/package/commander'),
 ]

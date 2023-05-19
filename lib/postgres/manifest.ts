@@ -21,11 +21,12 @@ export default class Manifest extends LibManifest {
     )
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async files(bundle: Bundle<NonNullable<unknown>>): Promise<BundleFile[]> {
-    return [
-      BundleFile.include('./src/infra/db/PostgresDataSource.ts'),
-      BundleFile.include('./src/bootstrap/postgres.ts'),
-    ]
+  async prepare(bundle: Bundle<NonNullable<unknown>>): Promise<void> {
+    bundle.addFiles(
+      ...[
+        BundleFile.include(this, './src/infra/db/PostgresDataSource.ts'),
+        BundleFile.include(this, './src/bootstrap/postgres.ts'),
+      ]
+    )
   }
 }
