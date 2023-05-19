@@ -11,6 +11,10 @@ type ServerConfig = {
   port: number
   /** Path to the frontend directory. */
   publicDir: string
+  /** Path to the libraries directory. */
+  libraryPath: string
+  /** Output directory for generated projects. */
+  outputPath: string
 }
 
 /** Current server configuration. */
@@ -19,6 +23,8 @@ export const server: ServerConfig = {
   host: string('SERVER_HOST'),
   port: number('SERVER_PORT'),
   publicDir: string('SERVER_PUBLIC_DIR'),
+  libraryPath: string('LIBRARY_PATH'),
+  outputPath: string('OUTPUT_PATH'),
 }
 
 /** Open AI Config **/

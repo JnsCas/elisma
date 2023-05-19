@@ -10,18 +10,18 @@ export class CandidateFile {
     /** Resolved library manifest. */
     readonly manifest: LibManifest,
     /** File to copy. */
-    private readonly file: BundleFile
+    readonly bundleFile: BundleFile
   ) {}
 
   get source(): string {
-    return this.file.source
+    return this.bundleFile.source
   }
 
   get target(): string {
-    return this.file.target
+    return this.bundleFile.target
   }
 
   get filtered(): boolean {
-    return this.file.mustFilter
+    return this.bundleFile.mustFilter
   }
 }

@@ -1,5 +1,6 @@
 import { LibraryDefinition } from '@quorum/elisma/src/domain/bundle/entities/LibraryDefinition'
 import { Project } from '@quorum/elisma/src/domain/bundle/Project'
+import { BundleFile } from '@quorum/elisma/src/domain/bundle/entities/BundleFile'
 
 export class Bundle<DependencyType> {
   static create<T>(project: Project<T>, libs: LibraryDefinition[], outputDir: string): Bundle<T> {
@@ -14,4 +15,15 @@ export class Bundle<DependencyType> {
     /** Path to write files to. */
     readonly outputDir: string
   ) {}
+
+  readonly files: BundleFile[] = []
+
+  addFiles(...files: BundleFile[]): Bundle<DependencyType> {
+    this.files.push(...files)
+    return this
+  }
+
+  get zipFileName(): string {
+    return `${this.project.name}.zip`
+  }
 }

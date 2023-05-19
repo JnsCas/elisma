@@ -134,7 +134,7 @@
           },
           contentType: "application/json",
           success: (response) => {
-            //TODO
+            window.location = `http://localhost:9000/api/v1/download/${sessionId}`
           },
           error: (xhr) => {
             alert('Error')
