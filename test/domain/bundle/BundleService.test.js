@@ -11,13 +11,14 @@ const libraryPath = path.join(process.cwd(), 'lib')
 describe('BundleManager', () => {
   test('builds a project', async () => {
     const manager = new BundleService(libraryPath)
-    const outputDir = path.join(process.cwd(), 'out')
+    const outputDir = path.join(process.cwd(), 'out', 'bundler')
     const packageJson = JSON.parse((await fs.readFile(path.join(process.cwd(), 'src', 'package.base.json'))).toString())
+    const candidateLibs = ['fastify', 'postgres', 'mongo']
 
     await manager.build(
       Bundle.create(
         NpmProject.create('@quorum/example', ProjectLanguage.TYPESCRIPT, packageJson),
-        SupportedLibraries.filter((lib) => lib.packageName === 'fastify'),
+        SupportedLibraries.filter((lib) => candidateLibs.includes(lib.packageName)),
         outputDir
       )
     )
