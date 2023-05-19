@@ -1,5 +1,5 @@
 import { FastifyReply } from 'fastify'
-import { EchoRequest } from '@quorum/lib/fastify/src/application/controllers/hello-basic/EchoRequest'
+import { EchoRequest } from '@quorum/lib/fastify/src/application/controllers/hello-data-source/EchoRequest'
 import { createLogger } from '@quorum/lib/pino/src/infra/log'
 
 const logger = createLogger('OpenAIController')

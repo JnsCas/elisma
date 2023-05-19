@@ -4,11 +4,13 @@ import { BundleFile } from '@quorum/elisma/src/domain/bundle/entities/BundleFile
 import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
 import { NpmDependency } from '@quorum/elisma/src/domain/bundle/npm/NpmDependency'
 import { Project } from '@quorum/elisma/src/domain/bundle/Project'
+import { LibDependency } from '@quorum/elisma/src/domain/bundle/entities/LibDependency'
 
 export default class Manifest extends LibManifest {
   constructor() {
     super({
       name: 'elisma',
+      libDependencies: [LibDependency.byName('pino')],
     })
   }
 
@@ -53,6 +55,8 @@ export default class Manifest extends LibManifest {
       ...baseFiles,
       BundleFile.include('./config/tsconfig.json', './tsconfig.json').filtered(),
       BundleFile.include('./src/infra/bootstrap.ts'),
+      BundleFile.include('./src/infra/configUtils.ts'),
+      BundleFile.include('./src/infra/Optional.ts'),
       BundleFile.include('./src/index.ts'),
     ]
   }
