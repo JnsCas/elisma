@@ -13,3 +13,13 @@ export const SupportedLibraries: LibraryDefinition[] = [
   LibraryDefinition.create('mongo', 'database driver', 'https://www.npmjs.com/package/mongodb'),
   LibraryDefinition.create('commander', 'command line interface', 'https://www.npmjs.com/package/commander'),
 ]
+
+export const SUPPORTED_LIBRARIES_JSON = SupportedLibraries.reduce(
+  (result: { [key: string]: any }, library: LibraryDefinition) => {
+    if (!result.hasOwnProperty(library.packageName)) {
+      result[library.packageName] = { category: library.category }
+    }
+    return result
+  },
+  {}
+)

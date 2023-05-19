@@ -1,5 +1,6 @@
 import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
 import { Scaffolding } from '@quorum/elisma/src/domain/bundle/entities/Scaffolding'
+import { SUPPORTED_LIBRARIES_JSON } from '@quorum/elisma/src/SupportedLibraries'
 
 export function createProgramLangPrompt(): string {
   return `You are going to write a JSON asking me which programming language I want to use for my new project. The only available languages are: ${Object.values(
@@ -58,7 +59,7 @@ On the response, include only the JSON.`
 
 export function receiveNamePrompt(prompt: string): string {
   return `You asked me what I want to call my new project and I answer you "${prompt}".
-You will tell the project name that I chose. You will write your response as JSON.
+You will tell me only the project name that I chose. You will write your response as JSON.
 Now consider the following TypeScript Interface for the JSON schema:
 
 interface Response {
@@ -85,41 +86,8 @@ On the response, include only the JSON.`
 
 export function generateProjectPrompt(scaffolding: Scaffolding): string {
   return `I have the following JSON object, where the keys are library names, and the values are objects containing the library's category:
-{
-  "fastify": {
-    "category": "web framework",
-  },
-  "express": {
-    "category": "web framework",
-  },
-  "jest": {
-    "category": "test framework",
-  },
-  "mocha": {
-    "category": "test framework",
-  },
-  "pino": {
-    "category": "logger",
-  },
-  "winston": {
-    "category": "logger",
-  },
-  "postgres": {
-    "category": "database driver",
-  },
-  "sqlite": {
-    "category": "database driver",
-  },
-  "mysql": {
-    "category": "database driver",
-  },
-  "mongo": {
-    "category": "database driver",
-  },
-  "commander": {
-    "category": "command line interface",
-  }
-}
+
+${JSON.stringify(SUPPORTED_LIBRARIES_JSON)}
 
 The programming language of the project is ${scaffolding.getLanguage}. 
 Based on my project requirements, generate a JSON object with the names of libraries that best match my criteria. 
