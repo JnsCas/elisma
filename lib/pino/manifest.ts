@@ -15,8 +15,7 @@ export default class Manifest extends LibManifest {
     project.addDependencies(NpmDependency.runtime('pino', '^8.14.1'), NpmDependency.runtime('pino-pretty', '^10.0.0'))
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async files(bundle: Bundle<any>): Promise<BundleFile[]> {
-    return [BundleFile.include('./src/infra/log.ts')]
+  async prepare(bundle: Bundle<any>): Promise<void> {
+    bundle.addFiles(BundleFile.include(this, './src/infra/log.ts'))
   }
 }

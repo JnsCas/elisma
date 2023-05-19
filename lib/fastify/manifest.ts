@@ -22,32 +22,37 @@ export default class Manifest extends LibManifest {
     )
   }
 
-  async files(bundle: Bundle<any>): Promise<BundleFile[]> {
-    const baseFiles: BundleFile[] = []
-
-    if (bundle.libs.some((library) => library.category === LibCategory.DatabaseDriver)) {
-      baseFiles.push(
+  async prepare(bundle: Bundle<any>): Promise<void> {
+    if (bundle.hasLibCategory(LibCategory.DatabaseDriver)) {
+      bundle.addFiles(BundleFile.include(this, './src/domain'))
+    }
+    if (bundle.hasLib('mongo')) {
+      bundle.addFiles(
         ...[
-          BundleFile.include('./src/application/controllers/hello-data-source'),
-          BundleFile.include('./src/bootstrap/controllers.dataSource.ts', 'src/bootstrap/controllers.ts'),
+          BundleFile.include(this, './src/application/controllers/hello-mongo'),
+          BundleFile.include(this, './src/bootstrap/controllers.mongo.ts'),
         ]
       )
-    } else {
-      baseFiles.push(
+    }
+    if (bundle.hasLib('postgres')) {
+      bundle.addFiles(
         ...[
-          BundleFile.include('./src/application/controllers/hello-basic'),
-          BundleFile.include('./src/bootstrap/controllers.basic.ts', 'src/bootstrap/controllers.ts'),
+          BundleFile.include(this, './src/application/controllers/hello-postgres'),
+          BundleFile.include(this, './src/bootstrap/controllers.postgres.ts'),
         ]
       )
     }
 
-    return [
-      ...baseFiles,
-      BundleFile.include('./src/application/controllers/index.ts'),
-      BundleFile.include('./src/application/controllers/schemas.ts'),
-      BundleFile.include('./src/application/plugins'),
-      BundleFile.include('./src/bootstrap/server.ts'),
-      BundleFile.include('./src/infra/errors'),
-    ]
+    bundle.addFiles(
+      ...[
+        BundleFile.include(this, './src/application/controllers/hello-basic'),
+        BundleFile.include(this, './src/bootstrap/controllers.basic.ts'),
+        BundleFile.include(this, './src/application/controllers/index.ts'),
+        BundleFile.include(this, './src/application/controllers/schemas.ts'),
+        BundleFile.include(this, './src/application/plugins'),
+        BundleFile.include(this, './src/bootstrap/server.ts'),
+        BundleFile.include(this, './src/infra/errors'),
+      ]
+    )
   }
 }

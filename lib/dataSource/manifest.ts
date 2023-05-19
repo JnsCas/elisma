@@ -11,8 +11,7 @@ export default class Manifest extends LibManifest {
     })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async files(bundle: Bundle<NonNullable<unknown>>): Promise<BundleFile[]> {
-    return [BundleFile.include('./src/infra/db')]
+  async prepare(bundle: Bundle<any>): Promise<void> {
+    bundle.addFiles(BundleFile.include(this, './src/infra/db'))
   }
 }
