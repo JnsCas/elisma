@@ -118,7 +118,7 @@ export class OpenAIService {
       if (e instanceof SyntaxError) {
         if (tryNumber < MAX_TRIES) {
           const nextTryNumber = tryNumber + 1
-          logger.info(`Error parsing Open AI response, trying again ${nextTryNumber + 1}/${MAX_TRIES}...`)
+          logger.info(`Error parsing Open AI response, trying again ${nextTryNumber}/${MAX_TRIES}...`)
           return await this.sendChatCompletion(session, retryPrompt(prompt), nextTryNumber)
         } else {
           logger.info(`Error parsing Open AI response`, e)
@@ -135,7 +135,7 @@ export class OpenAIService {
   }
 
   private isValidLanguage(language: string): boolean {
-    return Object.values(ProjectLanguage).includes(language.toLowerCase() as ProjectLanguage)
+    return Object.values(ProjectLanguage).includes(language.trim().toLowerCase() as ProjectLanguage)
   }
 
   private filterSupportedLibraries(candidateLibraries: string[]) {
