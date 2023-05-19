@@ -6,6 +6,9 @@ import Manifest from '@quorum/lib/fastify/manifest'
 import { Bundle } from '@quorum/elisma/src/domain/bundle/entities/Bundle'
 import { Project } from '@quorum/elisma/src/domain/bundle/Project'
 import { BundleFile } from '@quorum/elisma/src/domain/bundle/entities/BundleFile'
+import { createLogger } from '@quorum/elisma/src/infra/log'
+
+const logger = createLogger('BundleService')
 
 export class BundleService {
   constructor(
@@ -33,6 +36,7 @@ export class BundleService {
     return await Promise.all(
       libDirs.map(async (libDir) => {
         const manifestFile = path.join(this.libraryPath, libDir, 'manifest.ts')
+        logger.info(`loading manifest: ${manifestFile}`)
         const Manifest = (await require(manifestFile)).default
         return new Manifest()
       })
@@ -63,7 +67,9 @@ export class BundleService {
       return manifest
     })
 
-    return [...candidateManifests, ...dependencies]
+    return [...new Set([...candidateManifests, ...dependencies])].sort(
+      (manifest1, manifest2) => (manifest2.config.order || 0) - (manifest1.config.order || 0)
+    )
   }
 
   private async prepare<T>(bundle: Bundle<T>, manifests: Manifest[]): Promise<void> {
@@ -93,6 +99,7 @@ export class BundleService {
       manifests.map(async (manifest) => await manifest.configureProject(bundle.project as Project<any>))
     )
     await bundle.project.writeTo(bundle.outputDir)
+    await bundle.project.writeConfig(bundle.outputDir)
   }
 
   private async copyFiles<T>(bundle: Bundle<T>) {

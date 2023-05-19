@@ -9,7 +9,11 @@ export default class Manifest extends LibManifest {
   constructor() {
     super({
       name: 'postgres',
-      libDependencies: [LibDependency.byName('pino'), LibDependency.byName('dataSource')],
+      libDependencies: [
+        LibDependency.byName('pino'),
+        LibDependency.byName('dataSource'),
+        LibDependency.byName('dotenv'),
+      ],
     })
   }
 
@@ -19,6 +23,9 @@ export default class Manifest extends LibManifest {
       NpmDependency.runtime('pg-promise', '^11.0.2'),
       NpmDependency.dev('@types/pg', '^8.6.6')
     )
+    project.configFile('.env').append({
+      DB_POSTGRES_CONNECTION_STRING: 'postgresql://app:app_passwd@localhost:5432/app_local',
+    })
   }
 
   async prepare(bundle: Bundle<NonNullable<unknown>>): Promise<void> {
