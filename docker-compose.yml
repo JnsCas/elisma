@@ -13,6 +13,8 @@ services:
       - SERVER_PORT
       - SERVER_PUBLIC_DIR
       - OPEN_AI_API_KEY
+      - LIBRARY_PATH
+      - OUTPUT_PATH
     ports:
       - '9000:3000'
       - '6122:1339'

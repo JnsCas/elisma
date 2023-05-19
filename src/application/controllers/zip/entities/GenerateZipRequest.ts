@@ -5,7 +5,7 @@ export type SelectedLibrary = {
   packageName: string
 }
 
-export type ZipRequest = FastifyRequest<{
+export type GenerateZipRequest = FastifyRequest<{
   Body: {
     selectedLibraries: SelectedLibrary[]
   }

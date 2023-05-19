@@ -6,6 +6,7 @@ import { SessionController } from '@quorum/elisma/src/application/controllers/se
 import { OpenAIController } from '@quorum/elisma/src/application/controllers/openai/OpenAIController'
 import { POST_OPENAI_OPTIONS } from '@quorum/elisma/src/application/controllers/openai/schemas'
 import { ZipController } from '@quorum/elisma/src/application/controllers/zip/ZipController'
+import { DOWNLOAD_ZIP_OPTIONS } from '@quorum/elisma/src/application/controllers/zip/schemas'
 
 /** Registers all restricted endpoints.
  * Public endpoints require authentication.
@@ -33,4 +34,7 @@ export function registerPublic(app: FastifyInstance, container: ApplicationConta
   const sessionController: SessionController = container.cradle.sessionController
   app.post('/sessions', {}, sessionController.create.bind(sessionController))
   app.get('/sessions/:id', {}, sessionController.getById.bind(sessionController))
+
+  const zipController: ZipController = container.cradle.zipController
+  app.get('/download/:sessionId', DOWNLOAD_ZIP_OPTIONS, zipController.download.bind(zipController))
 }
