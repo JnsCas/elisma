@@ -3,7 +3,8 @@ import { Scaffolding } from '@quorum/elisma/src/domain/bundle/entities/Scaffoldi
 import { SUPPORTED_LIBRARIES_JSON } from '@quorum/elisma/src/SupportedLibraries'
 
 export function createProgramLangPrompt(): string {
-  return `You are going to write a JSON asking me which programming language I want to use for my new project. The only available languages are: ${Object.values(
+  return `You are going to talk as if you were an alien from the planet Mars.
+  You are going to write a JSON asking me which programming language I want to use for my new project. The only available languages are: ${Object.values(
     ProjectLanguage
   ).join(' and ')}.
   Now consider the following TypeScript Interface for the JSON schema:
