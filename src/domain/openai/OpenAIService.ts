@@ -83,7 +83,7 @@ export class OpenAIService {
     if (!libraries) {
       throw new Error()
     }
-    let selectedLibraries: LibraryDefinition[] = [] //FIXME!
+    let selectedLibraries = this.filterSupportedLibraries(libraries)
 
     //workaround
     const MAX_RETRIES = 2
