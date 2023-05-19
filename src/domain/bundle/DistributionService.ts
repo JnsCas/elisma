@@ -3,15 +3,12 @@ import path from 'path'
 import archiver from 'archiver'
 import { createReadStream, createWriteStream, ReadStream } from 'fs'
 import { createLogger } from '@quorum/elisma/src/infra/log'
-import { BundleService } from '@quorum/elisma/src/domain/bundle/BundleService'
 import { Bundle } from '@quorum/elisma/src/domain/bundle/entities/Bundle'
 
 const logger = createLogger('DistributionService')
 
 export class DistributionService {
   constructor(
-    /** Service to generate the zip bundle. */
-    readonly bundleService: BundleService,
     /** Service to generate the zip bundle. */
     readonly outputDir: string
   ) {}
@@ -23,7 +20,6 @@ export class DistributionService {
 
   async generateZip(sessionId: string, bundle: Bundle<any>): Promise<void> {
     logger.info(`generating zip file for bundle: ${bundle.zipFileName}`)
-    await this.bundleService.build(bundle)
     await this.buildZip(bundle.outputDir, path.join(this.outputDir, `${sessionId}.zip`))
   }
 

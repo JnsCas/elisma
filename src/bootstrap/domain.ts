@@ -17,8 +17,8 @@ function newBundleService(): BundleService {
   return new BundleService(server.libraryPath)
 }
 
-function newDistributionService(bundleService: BundleService): DistributionService {
-  return new DistributionService(bundleService, server.outputPath)
+function newDistributionService(): DistributionService {
+  return new DistributionService(server.outputPath)
 }
 
 function initClients() {

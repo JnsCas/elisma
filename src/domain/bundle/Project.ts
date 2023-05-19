@@ -17,10 +17,9 @@ export abstract class Project<DependencyType> {
   private readonly configFiles: { [key: string]: ConfigFile<any> } = {}
 
   addConfigFile<T>(file: ConfigFile<T>): Project<DependencyType> {
-    if (this.configFiles[file.name]) {
-      throw new Error(`config file already exist: ${file.name}`)
+    if (!this.configFiles[file.name]) {
+      this.configFiles[file.name] = file
     }
-    this.configFiles[file.name] = file
     return this
   }
 

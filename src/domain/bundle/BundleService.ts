@@ -83,7 +83,7 @@ export class BundleService {
   private async validateFiles<T>(bundle: Bundle<T>): Promise<void> {
     await Promise.all(
       bundle.files.map(async (file) => {
-        const source = path.join(this.libraryPath, file.source)
+        const source = path.resolve(this.libraryPath, file.source)
 
         try {
           await fs.stat(source)
@@ -109,9 +109,11 @@ export class BundleService {
     for (const file of files) {
       const source = path.join(this.libraryPath, file.source)
       const target = path.join(bundle.outputDir, file.target)
+      logger.info(`processing file: source=${source}, target=${target}`)
       const stats = await fs.stat(source)
 
       // Creates the target directory if it does not exist.
+      logger.info('ensuring path exists')
       if (stats.isFile()) {
         await fs.mkdir(path.dirname(target), { recursive: true })
       } else if (stats.isDirectory()) {
@@ -120,11 +122,14 @@ export class BundleService {
 
       if (stats.isFile()) {
         if (file.mustFilter) {
+          logger.info('filtering and writing file')
           await fs.writeFile(target, await this.filterFile(bundle, source))
         } else {
+          logger.info('copying file without filtering')
           await fs.cp(source, target, { recursive: true })
         }
       } else {
+        logger.info('source file is a directory, adding files recursively')
         await this.filterDirectory(bundle, file)
       }
     }
@@ -156,6 +161,7 @@ export class BundleService {
       } else {
         const sourceFile = path.join(this.libraryPath, dataDir.source, current)
         const targetFile = path.join(bundle.outputDir, dataDir.target, current)
+        logger.info(`adding file: source=${sourceFile}, target=${targetFile}`)
         const content = await this.filterFile(bundle, sourceFile)
 
         await fs.mkdir(path.dirname(targetFile), { recursive: true })
