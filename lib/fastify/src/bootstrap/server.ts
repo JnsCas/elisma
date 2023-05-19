@@ -5,6 +5,7 @@ import swagger from '@quorum/lib/fastify/src/application/plugins/swagger'
 import { register } from '@quorum/lib/fastify/src/application/controllers'
 import { createWebLogger } from '@quorum/lib/pino/src/infra/log'
 import { ApplicationContainer, ApplicationRegistry } from '@quorum/lib/elisma/src/infra/bootstrap'
+import { number, string } from '@quorum/lib/elisma/src/infra/configUtils'
 
 const logger = createWebLogger('web:elisma')
 
@@ -39,7 +40,7 @@ ApplicationRegistry.register(async function (container: ApplicationContainer) {
 
     try {
       logger.info(`NODE_ENV: ${process.env.NODE_ENV}`)
-      app.listen({ port: process.env.SERVER_PORT, host: process.env.SERVER_HOST })
+      app.listen({ port: number('SERVER_PORT'), host: string('SERVER_HOST') })
     } catch (err) {
       logger.error(err)
       process.exit(1)

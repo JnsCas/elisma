@@ -10,7 +10,7 @@ export default class Manifest extends LibManifest {
   constructor() {
     super({
       name: 'elisma',
-      libDependencies: [LibDependency.byName('pino')],
+      libDependencies: [LibDependency.byName('pino'), LibDependency.byName('dotenv')],
     })
   }
 

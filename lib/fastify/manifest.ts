@@ -10,7 +10,7 @@ export default class Manifest extends LibManifest {
   constructor() {
     super({
       name: 'fastify',
-      libDependencies: [LibDependency.byName('elisma'), LibDependency.byName('pino')],
+      libDependencies: [LibDependency.byName('elisma'), LibDependency.byName('pino'), LibDependency.byName('dotenv')],
     })
   }
 
@@ -20,6 +20,10 @@ export default class Manifest extends LibManifest {
       NpmDependency.runtime('@fastify/swagger', '^8.3.1'),
       NpmDependency.runtime('@fastify/swagger-ui', '^1.8.1')
     )
+    project.configFile('.env').append({
+      SERVER_PORT: '5000',
+      SERVER_HOST: '0.0.0.0',
+    })
   }
 
   async prepare(bundle: Bundle<any>): Promise<void> {
