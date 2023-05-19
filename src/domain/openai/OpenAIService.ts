@@ -83,9 +83,21 @@ export class OpenAIService {
     if (!libraries) {
       throw new Error()
     }
-    const selectedLibraries = SupportedLibraries.filter((supportedLibrary: LibraryDefinition) =>
-      libraries.some((name: string) => name === supportedLibrary.packageName)
-    )
+    let selectedLibraries = this.filterSupportedLibraries(libraries)
+
+    //workaround
+    const MAX_RETRIES = 2
+    let retries = 0
+    while (selectedLibraries.length === 0 && retries < MAX_RETRIES) {
+      logger.info(`Retrying libraries project ${retries + 1}/${MAX_RETRIES}...`)
+      const { libraries } = await this.sendChatCompletion(session, generateProjectPrompt(session.getScaffolding))
+      if (!libraries) {
+        throw new Error()
+      }
+      selectedLibraries = this.filterSupportedLibraries(libraries)
+      retries = retries + 1
+    }
+    //
 
     if (selectedLibraries.length === 0) {
       logger.info(`Selecting all the libraries as default...`)
@@ -106,7 +118,7 @@ export class OpenAIService {
       if (e instanceof SyntaxError) {
         if (tryNumber < MAX_TRIES) {
           const nextTryNumber = tryNumber + 1
-          logger.info(`Error parsing Open AI response, trying again ${nextTryNumber}/${MAX_TRIES}...`)
+          logger.info(`Error parsing Open AI response, trying again ${nextTryNumber + 1}/${MAX_TRIES}...`)
           return await this.sendChatCompletion(session, retryPrompt(prompt), nextTryNumber)
         } else {
           logger.info(`Error parsing Open AI response`, e)
@@ -124,5 +136,11 @@ export class OpenAIService {
 
   private isValidLanguage(language: string): boolean {
     return Object.values(ProjectLanguage).includes(language.toLowerCase() as ProjectLanguage)
+  }
+
+  private filterSupportedLibraries(candidateLibraries: string[]) {
+    return SupportedLibraries.filter((supportedLibrary: LibraryDefinition) =>
+      candidateLibraries.some((name: string) => name === supportedLibrary.packageName)
+    )
   }
 }

@@ -127,7 +127,8 @@
 
           },
           error: function(response) {
-            alert(`Error: ${JSON.stringify(response)}`)
+            const errorMessage = response.responseText
+            alert(errorMessage)
           }
         });
       });
