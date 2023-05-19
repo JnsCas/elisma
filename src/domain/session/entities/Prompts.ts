@@ -21,7 +21,7 @@ export function receiveLanguagePrompt(): string {
     ProjectLanguage
   ).join(
     ' o '
-  )}. I can use acronyms to chose the programming language. You will interpret my answer and write a JSON as response.
+  )}. I can use acronyms to choose the programming language. You will interpret my answer and write a JSON as response.
 Now consider the following TypeScript Interface for the JSON schema:
 
 interface Response {
