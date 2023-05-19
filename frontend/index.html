@@ -30,7 +30,20 @@
       'command line interface': 'Command Line Interface'
     }
 
+    const disableButton = () => {
+      $("#talkButton").prop("disabled", true);
+    }
+
+    const enableButton = () => {
+      $("#talkButton").prop("disabled", false);
+    }
+
+    const clearInput = () => {
+      $("#myInput").val("");
+    }
+
     const doFirstQuestion = (sessionId) => {
+      disableButton();
       $.ajax({
         url: "http://localhost:9000/api/v1/openai/ask-label",
         type: "GET",
@@ -39,10 +52,11 @@
         },
         success: function(response) {
           $("#elismaResponseTextArea").val(response);
-          $("#talkButton").prop("disabled", false);
+          enableButton();
         },
         error: function(xhr) {
           $("#elismaResponseTextArea").val("Error");
+          enableButton();
         }
       });
     }
@@ -61,8 +75,10 @@
         }
       });
 
-      $("#talkButton").click(function() {
+      const sendRequest = () => {
+        disableButton();
         var inputValue = $("#myInput").val();
+        clearInput();
 
         const payload = {
           prompt: inputValue
@@ -79,7 +95,7 @@
             $("#elismaResponseTextArea").val(response.message)
             const { selectedLibraries } = response.scaffolding
             if (selectedLibraries.length > 0) {
-              $("#talkButton").prop("disabled", true);
+              disableButton();
 
               const radioList = $("#radioList")
               radioList.append($("<h2>").text('Select libraries:'))
@@ -106,14 +122,26 @@
                 $("#downloadZip").show();
               }
             });
+
+            enableButton();
           },
           error: function(response) {
-            alert(`Error: ${JSON.stringify(response)}`)
+            $("#elismaResponseTextArea").val(`Error: ${JSON.stringify(response)}`);
+            enableButton();
           }
         });
+      }
+
+      $("#talkButton").click(sendRequest);
+
+      $("#myInput").keypress(function(event) {
+        if (event.keyCode === 13) {
+          sendRequest();
+        }
       });
 
       $("#downloadZip").click(() => {
+        disableButton();
         const selectedLibraries = []
         $('input[type="radio"]:checked').each(function() {
           const category = $(this).attr("name")
@@ -134,10 +162,11 @@
           },
           contentType: "application/json",
           success: (response) => {
-            //TODO
+            // TODO: Handle ZIP file download response
           },
           error: (xhr) => {
-            alert('Error')
+            alert('Error');
+            enableButton();
           }
         });
       });
