@@ -44,7 +44,10 @@ export class OpenAIService {
   async receiveLanguage(session: Session, prompt: string) {
     session.addChatMessage(Role.USER, receiveLanguagePrompt())
     const { answer } = await this.sendChatCompletion(session, prompt)
-    if (answer && !this.isValidLanguage(answer)) {
+    if (!answer) {
+      throw new Error()
+    }
+    if (!this.isValidLanguage(answer)) {
       const { answer } = await this.sendChatCompletion(session, retryProgramLangPrompt(prompt))
       return answer
     }
