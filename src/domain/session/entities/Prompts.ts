@@ -19,7 +19,9 @@ On the response, include only the JSON.`
 export function receiveLanguagePrompt(): string {
   return `I'm going to tell you which programming language I will choose for my new project. The available languages are:${Object.values(
     ProjectLanguage
-  ).join(' o ')}. You will interpret my answer and write a JSON as response.
+  ).join(
+    ' o '
+  )}. I can use acronyms to choose the programming language. You will interpret my answer and write a JSON as response.
 Now consider the following TypeScript Interface for the JSON schema:
 
 interface Response {

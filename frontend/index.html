@@ -31,6 +31,7 @@
     }
 
     const doFirstQuestion = (sessionId) => {
+      disabledElements(true)
       $.ajax({
         url: "http://localhost:9000/api/v1/openai/ask-label",
         type: "GET",
@@ -39,21 +40,33 @@
         },
         success: function(response) {
           $("#elismaResponseTextArea").val(response);
-          $("#talkButton").prop("disabled", false);
+          disabledElements(false)
         },
         error: function(xhr) {
-          $("#elismaResponseTextArea").val("Error");
+          alert("Error")
         }
       });
     }
 
+    const disabledElements = (isLoading) => {
+      $("#elismaResponseTextArea").prop("disabled", isLoading);
+      $("#myInput").prop("disabled", isLoading);
+      $("#talkButton").prop("disabled", isLoading);
+
+      if (!isLoading) {
+        $("#myInput").focus();
+      }
+    }
+
     let sessionId
     $(document).ready(function() {
+      disabledElements(true)
       $.ajax({
         url: "http://localhost:9000/api/v1/sessions",
         type: "POST",
         success: function(response) {
           sessionId = response.id
+          disabledElements(false)
           doFirstQuestion(sessionId)
         },
         error: function(xhr) {
@@ -62,7 +75,9 @@
       });
 
       $("#talkButton").click(function() {
+        disabledElements(true)
         var inputValue = $("#myInput").val();
+        $("#myInput").prop('value', '')
 
         const payload = {
           prompt: inputValue
@@ -99,13 +114,17 @@
                 });
                 radioList.append(categoryDiv);
               })
+            } else {
+              disabledElements(false)
             }
 
             $('input[type="radio"]').on("change", () => {
               if ($('input[type="radio"]:checked').length > 0) {
                 $("#downloadZip").show();
+
               }
             });
+
           },
           error: function(response) {
             alert(`Error: ${JSON.stringify(response)}`)
@@ -113,7 +132,15 @@
         });
       });
 
+      $("#myInput").keypress(function(event) {
+        if (event.which === 13) {
+          event.preventDefault();
+          $("#talkButton").click();
+        }
+      });
+
       $("#downloadZip").click(() => {
+        disabledElements(true)
         const selectedLibraries = []
         $('input[type="radio"]:checked').each(function() {
           const category = $(this).attr("name")
