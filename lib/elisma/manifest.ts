@@ -5,12 +5,38 @@ import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/Proje
 import { NpmDependency } from '@quorum/elisma/src/domain/bundle/npm/NpmDependency'
 import { Project } from '@quorum/elisma/src/domain/bundle/Project'
 import { LibDependency } from '@quorum/elisma/src/domain/bundle/entities/LibDependency'
+import { LibCategory } from '@quorum/elisma/src/domain/bundle/entities/LibCategory'
 
 export default class Manifest extends LibManifest {
   constructor() {
     super({
       name: 'elisma',
-      libDependencies: [LibDependency.byName('pino'), LibDependency.byName('dotenv')],
+      description: 'opinionated application loader',
+      category: LibCategory.Loader,
+      requires: [LibDependency.byName('pino'), LibDependency.byName('dotenv')],
+      docs: `
+        This loader provides an IoC container using Awilix, a dependency injection library. It allows libraries to
+        register their own context in the application using a bootstrap directory. All files in the bootstrap
+        directory will be dynamically loaded at the application startup. The default bootstrap directory where
+        all libraries must put their initialization code is __src/bootstrap/__.
+        
+        Libraries must use the ApplicationRegistry global component to register themselves into the application
+        context. The following example shows a bootstrap file:
+        
+          ApplicationRegistry.register(async function (container: ApplicationContainer) {
+            container.register({
+              libComponent1: asClass(LibComponent1).singleton(),
+              libComponent2: asFunction(newLibComponent2).singleton(),
+            })
+          
+            container.onStart(async () => {
+              const component1 = container.cradle.libComponent1
+              const component2 = container.cradle.libComponent2
+              component1.start()
+              component2.start()
+            })
+          })
+      `,
     })
   }
 
@@ -41,7 +67,7 @@ export default class Manifest extends LibManifest {
     project.metadata.scripts['start'] = 'ts-node-dev -r tsconfig-paths/register src/index.ts'
   }
 
-  async prepare(bundle: Bundle<any>): Promise<void> {
+  async prepareBundle(bundle: Bundle<any>): Promise<void> {
     if (bundle.project.language === ProjectLanguage.TYPESCRIPT) {
       bundle.addFiles(BundleFile.include(this, './config/.eslintrc.typescript.cjs', './.eslintrc.cjs'))
     } else if (bundle.project.language === ProjectLanguage.JAVASCRIPT) {
@@ -49,13 +75,11 @@ export default class Manifest extends LibManifest {
     }
 
     bundle.addFiles(
-      ...[
-        BundleFile.include(this, './config/tsconfig.json', './tsconfig.json').filtered(),
-        BundleFile.include(this, './src/infra/bootstrap.ts'),
-        BundleFile.include(this, './src/infra/configUtils.ts'),
-        BundleFile.include(this, './src/infra/Optional.ts'),
-        BundleFile.include(this, './src/index.ts'),
-      ]
+      BundleFile.include(this, './config/tsconfig.json', './tsconfig.json').filtered(),
+      BundleFile.include(this, './src/infra/bootstrap.ts'),
+      BundleFile.include(this, './src/infra/configUtils.ts'),
+      BundleFile.include(this, './src/infra/Optional.ts'),
+      BundleFile.include(this, './src/index.ts')
     )
   }
 }

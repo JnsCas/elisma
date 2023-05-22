@@ -5,7 +5,7 @@ export class BundleFile {
   static include(manifest: LibManifest, source: string, target?: string): BundleFile {
     return new BundleFile(
       manifest,
-      path.join(manifest.config.name, source),
+      path.join(manifest.name, source),
       target || source,
       source.endsWith('.ts') || source.endsWith('.js')
     )

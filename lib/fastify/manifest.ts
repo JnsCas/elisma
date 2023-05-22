@@ -10,7 +10,31 @@ export default class Manifest extends LibManifest {
   constructor() {
     super({
       name: 'fastify',
-      libDependencies: [LibDependency.byName('elisma'), LibDependency.byName('pino'), LibDependency.byName('dotenv')],
+      description: 'Fastify web framework',
+      category: LibCategory.WebFramework,
+      unique: true,
+      requires: [LibDependency.byName('elisma'), LibDependency.byName('pino'), LibDependency.byName('dotenv')],
+      excludes: [LibDependency.byCategory(LibCategory.CLI)],
+      docs: `
+        This library integrates Fastify using an opinionated project structure. It will generate the following
+        directory structure:
+        
+          [root]
+            |--> application
+            |   |--> controllers
+            |   |   |--> domainConcept
+            |   |   |   |--> HelloController.ts
+            |   |   |   |--> schemas.ts
+            |   |   |--> index.ts
+            |   |--> plugins
+            |   |--> middlewares
+            |--> domain
+            |   |--> domainConcept
+            |       |--> entities
+            |--> bootstrap
+                |--> controllers.ts
+                |--> server.ts
+      `,
     })
   }
 
@@ -20,43 +44,37 @@ export default class Manifest extends LibManifest {
       NpmDependency.runtime('@fastify/swagger', '^8.3.1'),
       NpmDependency.runtime('@fastify/swagger-ui', '^1.8.1')
     )
-    project.configFile('.env').append({
+    project.file('.env').append({
       SERVER_PORT: '5000',
       SERVER_HOST: '0.0.0.0',
     })
   }
 
-  async prepare(bundle: Bundle<any>): Promise<void> {
+  async prepareBundle(bundle: Bundle<any>): Promise<void> {
     if (bundle.hasLibCategory(LibCategory.DatabaseDriver)) {
       bundle.addFiles(BundleFile.include(this, './src/domain'))
     }
     if (bundle.hasLib('mongo')) {
       bundle.addFiles(
-        ...[
-          BundleFile.include(this, './src/application/controllers/hello-mongo'),
-          BundleFile.include(this, './src/bootstrap/controllers.mongo.ts'),
-        ]
+        BundleFile.include(this, './src/application/controllers/hello-mongo'),
+        BundleFile.include(this, './src/bootstrap/controllers.mongo.ts')
       )
     }
     if (bundle.hasLib('postgres')) {
       bundle.addFiles(
-        ...[
-          BundleFile.include(this, './src/application/controllers/hello-postgres'),
-          BundleFile.include(this, './src/bootstrap/controllers.postgres.ts'),
-        ]
+        BundleFile.include(this, './src/application/controllers/hello-postgres'),
+        BundleFile.include(this, './src/bootstrap/controllers.postgres.ts')
       )
     }
 
     bundle.addFiles(
-      ...[
-        BundleFile.include(this, './src/application/controllers/hello-basic'),
-        BundleFile.include(this, './src/bootstrap/controllers.basic.ts'),
-        BundleFile.include(this, './src/application/controllers/index.ts'),
-        BundleFile.include(this, './src/application/controllers/schemas.ts'),
-        BundleFile.include(this, './src/application/plugins'),
-        BundleFile.include(this, './src/bootstrap/server.ts'),
-        BundleFile.include(this, './src/infra/errors'),
-      ]
+      BundleFile.include(this, './src/application/controllers/hello-basic'),
+      BundleFile.include(this, './src/bootstrap/controllers.basic.ts'),
+      BundleFile.include(this, './src/application/controllers/index.ts'),
+      BundleFile.include(this, './src/application/controllers/schemas.ts'),
+      BundleFile.include(this, './src/application/plugins'),
+      BundleFile.include(this, './src/bootstrap/server.ts'),
+      BundleFile.include(this, './src/infra/errors')
     )
   }
 }

@@ -1,4 +1,3 @@
-import { LibraryDefinition } from '@quorum/elisma/src/domain/bundle/entities/LibraryDefinition'
 import * as fs from 'fs/promises'
 import path from 'path'
 import { LibManifest } from '@quorum/elisma/src/domain/bundle/LibManifest'
@@ -16,22 +15,24 @@ export class BundleService {
     readonly libraryPath: string
   ) {}
 
-  async build<T>(bundle: Bundle<T>): Promise<Bundle<T>> {
-    const manifests = await this.resolveManifests(bundle.libs)
+  async findManifests(libs: string[] = []): Promise<LibManifest[]> {
+    return await this.resolveManifests(libs)
+  }
 
+  async build<T>(bundle: Bundle<T>): Promise<Bundle<T>> {
     // cleans up output directory
     await fs.rm(bundle.outputDir, { recursive: true, force: true })
     await fs.mkdir(bundle.outputDir, { recursive: true })
 
-    await this.configureProject(bundle, manifests)
-    await this.prepare(bundle, manifests)
+    await this.configureProject(bundle)
+    await this.prepare(bundle)
     await this.validateFiles(bundle)
     await this.copyFiles(bundle)
 
     return bundle
   }
 
-  private async findManifests(): Promise<LibManifest[]> {
+  private async loadManifests(): Promise<LibManifest[]> {
     const libDirs = await fs.readdir(path.resolve(this.libraryPath))
     return await Promise.all(
       libDirs.map(async (libDir) => {
@@ -43,24 +44,26 @@ export class BundleService {
     )
   }
 
-  private async resolveManifests(libs: LibraryDefinition[]): Promise<Manifest[]> {
-    const manifests = await this.findManifests()
-    const candidateManifests: Manifest[] = libs.map((lib) => {
-      const manifest = manifests.find((manifest) => manifest.config.name === lib.packageName)
-      if (!manifest) {
-        throw new Error(`manifest not found for library: ${lib.packageName}`)
-      }
-      return manifest
-    })
+  private async resolveManifests(libs: string[]): Promise<Manifest[]> {
+    const manifests = await this.loadManifests()
+    let candidateManifests: Manifest[] = manifests
+
+    if (libs.length > 0) {
+      candidateManifests = libs.map((lib) => {
+        const manifest = manifests.find((manifest) => manifest.name === lib)
+        if (!manifest) {
+          throw new Error(`manifest not found for library: ${lib}`)
+        }
+        return manifest
+      })
+    }
 
     const dependencyNames: string[] = [
-      ...new Set(
-        candidateManifests.flatMap((manifest) => manifest.config.libDependencies?.map((dependency) => dependency.name))
-      ),
+      ...new Set(candidateManifests.flatMap((manifest) => manifest.requires.map((dependency) => dependency.name))),
     ].filter((dependency) => dependency !== undefined) as string[]
 
     const dependencies = dependencyNames.map((dependency) => {
-      const manifest = manifests.find((manifest) => manifest.config.name === dependency)
+      const manifest = manifests.find((manifest) => manifest.name === dependency)
       if (!manifest) {
         throw new Error(`manifest not found for library: ${dependency}`)
       }
@@ -68,14 +71,14 @@ export class BundleService {
     })
 
     return [...new Set([...candidateManifests, ...dependencies])].sort(
-      (manifest1, manifest2) => (manifest2.config.order || 0) - (manifest1.config.order || 0)
+      (manifest1, manifest2) => manifest2.order - manifest1.order
     )
   }
 
-  private async prepare<T>(bundle: Bundle<T>, manifests: Manifest[]): Promise<void> {
+  private async prepare<T>(bundle: Bundle<T>): Promise<void> {
     await Promise.all(
-      manifests.map(async (manifest: Manifest) => {
-        await manifest.prepare(bundle)
+      bundle.project.manifests.map(async (manifest: Manifest) => {
+        await manifest.prepareBundle(bundle)
       })
     )
   }
@@ -94,9 +97,9 @@ export class BundleService {
     )
   }
 
-  private async configureProject<T>(bundle: Bundle<T>, manifests: LibManifest[]) {
+  private async configureProject<T>(bundle: Bundle<T>) {
     await Promise.all(
-      manifests.map(async (manifest) => await manifest.configureProject(bundle.project as Project<any>))
+      bundle.project.manifests.map(async (manifest) => await manifest.configureProject(bundle.project as Project<any>))
     )
     await bundle.project.writeTo(bundle.outputDir)
     await bundle.project.writeConfig(bundle.outputDir)
