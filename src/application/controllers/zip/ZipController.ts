@@ -74,10 +74,10 @@ export class ZipController {
     const normalizedName = name.startsWith('@') ? name : `@${name}`
     const outputDir = path.join(process.cwd(), `out/${sessionId}/`)
 
+    const manifests = await this.bundleService.findManifests(libs.map((lib) => lib.packageName))
     const bundle = await this.bundleService.build(
       Bundle.create(
-        NpmProject.create(normalizedName, scaffolding.getLanguage as ProjectLanguage, packageJson),
-        libs,
+        NpmProject.create(normalizedName, scaffolding.getLanguage as ProjectLanguage, manifests, packageJson),
         outputDir
       )
     )

@@ -1,16 +1,23 @@
+import * as fs from 'fs/promises'
+import path from 'path'
 import { Project } from '@quorum/elisma/src/domain/bundle/Project'
 import { NpmDependency } from '@quorum/elisma/src/domain/bundle/npm/NpmDependency'
 import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
-import * as fs from 'fs/promises'
-import path from 'path'
+import { LibManifest } from '@quorum/elisma/src/domain/bundle/LibManifest'
 
 export class NpmProject extends Project<NpmDependency> {
-  static create(name: string, language: ProjectLanguage, metadata: any): NpmProject {
-    return new NpmProject(name, language, metadata)
+  static create(name: string, language: ProjectLanguage, manifests: LibManifest[], metadata: any): NpmProject {
+    return new NpmProject(name, language, manifests, metadata)
   }
 
-  private constructor(name: string, language: ProjectLanguage, metadata: any) {
-    super(name, language, metadata)
+  private constructor(
+    name: string,
+    language: ProjectLanguage,
+    /** Libraries included in this project. */
+    manifests: LibManifest[],
+    metadata: any
+  ) {
+    super(name, language, manifests, metadata)
     metadata.name = name
   }
 
