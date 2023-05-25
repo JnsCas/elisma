@@ -19,7 +19,7 @@ export class BundleService {
     return await this.resolveManifests(libs)
   }
 
-  async build<T>(bundle: Bundle<T>): Promise<Bundle<T>> {
+  async build(bundle: Bundle): Promise<Bundle> {
     // cleans up output directory
     await fs.rm(bundle.outputDir, { recursive: true, force: true })
     await fs.mkdir(bundle.outputDir, { recursive: true })
@@ -75,7 +75,7 @@ export class BundleService {
     )
   }
 
-  private async prepare<T>(bundle: Bundle<T>): Promise<void> {
+  private async prepare(bundle: Bundle): Promise<void> {
     await Promise.all(
       bundle.project.manifests.map(async (manifest: Manifest) => {
         await manifest.prepareBundle(bundle)
@@ -83,7 +83,7 @@ export class BundleService {
     )
   }
 
-  private async validateFiles<T>(bundle: Bundle<T>): Promise<void> {
+  private async validateFiles(bundle: Bundle): Promise<void> {
     await Promise.all(
       bundle.files.map(async (file) => {
         const source = path.resolve(this.libraryPath, file.source)
@@ -97,15 +97,14 @@ export class BundleService {
     )
   }
 
-  private async configureProject<T>(bundle: Bundle<T>) {
+  private async configureProject(bundle: Bundle) {
     await Promise.all(
-      bundle.project.manifests.map(async (manifest) => await manifest.configureProject(bundle.project as Project<any>))
+      bundle.project.manifests.map(async (manifest) => await manifest.configureProject(bundle.project as Project))
     )
-    await bundle.project.writeTo(bundle.outputDir)
     await bundle.project.writeConfig(bundle.outputDir)
   }
 
-  private async copyFiles<T>(bundle: Bundle<T>) {
+  private async copyFiles(bundle: Bundle) {
     // prevents concurrent modification
     const files = [...bundle.files]
 
@@ -138,7 +137,7 @@ export class BundleService {
     }
   }
 
-  private async filterFile<T>(bundle: Bundle<T>, file: string): Promise<string> {
+  private async filterFile(bundle: Bundle, file: string): Promise<string> {
     const content = (await fs.readFile(file)).toString()
     let normalizedName: string = bundle.project.name
 
@@ -149,7 +148,7 @@ export class BundleService {
     return content.replaceAll(/@quorum\/lib\/[\w-]+\//gi, normalizedName)
   }
 
-  private async filterDirectory(bundle: Bundle<any>, dataDir: BundleFile) {
+  private async filterDirectory(bundle: Bundle, dataDir: BundleFile) {
     // traverse the directory tree using a queue to avoid recursion.
     const queue: string[] = await fs.readdir(path.join(this.libraryPath, dataDir.source))
 

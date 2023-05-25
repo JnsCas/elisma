@@ -11,7 +11,7 @@ export class ReadmeFileHandler extends ProjectFileHandler {
     super(README_FILE_NAME)
   }
 
-  async writeTo(project: Project<any>, file: ProjectFile, outputDir: string): Promise<void> {
+  async writeTo(project: Project, file: ProjectFile, outputDir: string): Promise<void> {
     const resolvedConfig: string = project.manifests.reduce((result, manifest) => {
       if (manifest.docs) {
         const docs = manifest.docs.replaceAll(/^\s{8}/gim, '')

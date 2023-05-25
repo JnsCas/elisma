@@ -5,11 +5,13 @@ import { LibDependency } from '@quorum/elisma/src/domain/bundle/entities/LibDepe
 import { Project } from '@quorum/elisma/src/domain/bundle/Project'
 import { NpmDependency } from '@quorum/elisma/src/domain/bundle/npm/NpmDependency'
 import { LibCategory } from '@quorum/elisma/src/domain/bundle/entities/LibCategory'
+import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
 
 export default class Manifest extends LibManifest {
   constructor() {
     super({
       name: 'postgres',
+      languages: [ProjectLanguage.TYPESCRIPT, ProjectLanguage.JAVASCRIPT],
       description: 'PostgreSQL database driver',
       category: LibCategory.DatabaseDriver,
       requires: [LibDependency.byName('pino'), LibDependency.byName('data-source')],
@@ -40,7 +42,7 @@ export default class Manifest extends LibManifest {
     })
   }
 
-  async configureProject(project: Project<any>): Promise<void> {
+  async configureProject(project: Project): Promise<void> {
     project.addDependencies(
       NpmDependency.runtime('pg', '^8.8.0'),
       NpmDependency.runtime('pg-promise', '^11.0.2'),
@@ -65,7 +67,7 @@ export default class Manifest extends LibManifest {
     })
   }
 
-  async prepareBundle(bundle: Bundle<any>): Promise<void> {
+  async prepareBundle(bundle: Bundle): Promise<void> {
     if (bundle.hasLib('dotenv') && bundle.hasLib('elisma-loader')) {
       bundle.addFiles(BundleFile.include(this, './src/bootstrap/postgres.ts'))
     }

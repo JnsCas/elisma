@@ -3,11 +3,13 @@ import { Bundle } from '@quorum/elisma/src/domain/bundle/entities/Bundle'
 import { BundleFile } from '@quorum/elisma/src/domain/bundle/entities/BundleFile'
 import { LibDependency } from '@quorum/elisma/src/domain/bundle/entities/LibDependency'
 import { LibCategory } from '@quorum/elisma/src/domain/bundle/entities/LibCategory'
+import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
 
 export default class Manifest extends LibManifest {
   constructor() {
     super({
       name: 'ping-domain',
+      languages: [ProjectLanguage.TYPESCRIPT, ProjectLanguage.JAVASCRIPT],
       description: 'Opinionated application module that shows how to implement domain-driven design in a Node project.',
       category: LibCategory.ProjectComponent,
       unique: true,
@@ -36,7 +38,7 @@ export default class Manifest extends LibManifest {
     })
   }
 
-  async prepareBundle(bundle: Bundle<any>): Promise<void> {
+  async prepareBundle(bundle: Bundle): Promise<void> {
     if (bundle.hasLib('mongo')) {
       bundle.addFiles(BundleFile.include(this, './src/domain/pings/MongoPingRepository.ts'))
     }

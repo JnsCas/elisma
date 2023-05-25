@@ -1,4 +1,3 @@
-import fs from 'fs/promises'
 import path from 'path'
 import { FastifyReply } from 'fastify'
 import { createLogger } from '@quorum/elisma/src/infra/log'
@@ -62,7 +61,6 @@ export class ZipController {
       throw new BadRequestError('project name or programming language not specified')
     }
 
-    const packageJson = JSON.parse((await fs.readFile(path.join(process.cwd(), 'src', 'package.base.json'))).toString())
     const libs = selectedLibraries.map(
       (selectedLib) =>
         SupportedLibraries.find(
@@ -76,10 +74,7 @@ export class ZipController {
 
     const manifests = await this.bundleService.findManifests(libs.map((lib) => lib.packageName))
     const bundle = await this.bundleService.build(
-      Bundle.create(
-        NpmProject.create(normalizedName, scaffolding.getLanguage as ProjectLanguage, manifests, packageJson),
-        outputDir
-      )
+      Bundle.create(NpmProject.create(normalizedName, scaffolding.getLanguage as ProjectLanguage, manifests), outputDir)
     )
 
     await this.sessionService.update(session.updateBundle(bundle))

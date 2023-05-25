@@ -4,6 +4,7 @@ import { Project } from '@quorum/elisma/src/domain/bundle/Project'
 import { LibDependency } from '@quorum/elisma/src/domain/bundle/entities/LibDependency'
 import { LibCategory } from '@quorum/elisma/src/domain/bundle/entities/LibCategory'
 import { Optional } from '@quorum/elisma/src/infra/Optional'
+import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
 
 export abstract class LibManifest {
   protected constructor(
@@ -12,6 +13,8 @@ export abstract class LibManifest {
     readonly name: string = config.name,
     /** Library category. */
     readonly category: LibCategory = config.category,
+    /** Programming languages supported by this library. */
+    readonly languages: ProjectLanguage[] = config.languages,
     /** Library description. */
     readonly description: Optional<string> = config.description,
     /** Library documentation. */
@@ -27,12 +30,12 @@ export abstract class LibManifest {
   ) {}
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async configureProject<T>(project: Project<T>): Promise<void> {
+  async configureProject<T extends Project>(project: T): Promise<void> {
     return Promise.resolve()
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async prepareBundle<T>(bundle: Bundle<T>): Promise<void> {
+  async prepareBundle(bundle: Bundle): Promise<void> {
     return Promise.resolve()
   }
 }

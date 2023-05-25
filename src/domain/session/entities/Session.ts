@@ -9,7 +9,7 @@ import { Optional } from '@quorum/elisma/src/infra/Optional'
 
 export class Session {
   private scaffolding: Scaffolding
-  private resolvedBundle?: Bundle<any>
+  private resolvedBundle?: Bundle
 
   private constructor(readonly id: string, readonly messages: ChatMessage[]) {
     this.scaffolding = new Scaffolding()
@@ -40,12 +40,12 @@ export class Session {
     this.scaffolding.setSelectedLibraries(libraries)
   }
 
-  updateBundle(bundle: Bundle<any>): Session {
+  updateBundle(bundle: Bundle): Session {
     this.resolvedBundle = bundle
     return this
   }
 
-  get bundle(): Optional<Bundle<any>> {
+  get bundle(): Optional<Bundle> {
     return this.resolvedBundle
   }
 
