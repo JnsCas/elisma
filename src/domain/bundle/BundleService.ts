@@ -146,7 +146,7 @@ export class BundleService {
       normalizedName = `${bundle.project.name}/`
     }
 
-    return content.replaceAll(/@quorum\/lib\/\w+\//gi, normalizedName)
+    return content.replaceAll(/@quorum\/lib\/[\w-]+\//gi, normalizedName)
   }
 
   private async filterDirectory(bundle: Bundle<any>, dataDir: BundleFile) {

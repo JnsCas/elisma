@@ -7,7 +7,7 @@ import { LibCategory } from '@quorum/elisma/src/domain/bundle/entities/LibCatego
 export default class Manifest extends LibManifest {
   constructor() {
     super({
-      name: 'dataSource',
+      name: 'data-source',
       description: 'data source common interface',
       category: LibCategory.DatabaseDriver,
       requires: [LibDependency.byName('pino')],

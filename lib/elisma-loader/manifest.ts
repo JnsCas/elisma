@@ -10,8 +10,8 @@ import { LibCategory } from '@quorum/elisma/src/domain/bundle/entities/LibCatego
 export default class Manifest extends LibManifest {
   constructor() {
     super({
-      name: 'elisma',
-      description: 'opinionated application loader',
+      name: 'elisma-loader',
+      description: 'Opinionated application loader',
       category: LibCategory.Loader,
       requires: [LibDependency.byName('pino'), LibDependency.byName('dotenv')],
       docs: `

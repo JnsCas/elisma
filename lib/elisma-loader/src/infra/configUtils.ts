@@ -1,4 +1,4 @@
-import { Optional } from '@quorum/lib/elisma/src/infra/Optional'
+import { Optional } from '@quorum/lib/elisma-loader/src/infra/Optional'
 
 /** Returns an array of strings from an environment variable of type string with elements separated by commas.
  *

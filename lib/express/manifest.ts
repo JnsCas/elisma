@@ -9,8 +9,8 @@ import { NpmDependency } from '@quorum/elisma/src/domain/bundle/npm/NpmDependenc
 export default class Manifest extends LibManifest {
   constructor() {
     super({
-      name: 'fastify',
-      description: 'Fastify web framework',
+      name: 'express',
+      description: 'Express web framework',
       category: LibCategory.WebFramework,
       unique: true,
       requires: [
@@ -21,7 +21,7 @@ export default class Manifest extends LibManifest {
       ],
       excludes: [LibDependency.byCategory(LibCategory.CLI), LibDependency.byCategory(LibCategory.WebFramework)],
       docs: `
-        This library integrates Fastify using an opinionated project structure. It will generate the following
+        This library integrates Express using an opinionated project structure. It will generate the following
         directory structure:
         
           [root]
@@ -31,27 +31,24 @@ export default class Manifest extends LibManifest {
             |   |   |   |--> HelloController.ts
             |   |   |   |--> schemas.ts
             |   |   |--> index.ts
-            |   |--> plugins
-            |   |--> middlewares
             |--> domain
             |   |--> pings
             |       |--> entities
             |--> bootstrap
                 |--> controllers.ts
-                |--> server.ts
+                |--> server.express.ts
       `,
     })
   }
 
   async configureProject(project: Project<any>): Promise<void> {
     project.addDependencies(
-      NpmDependency.runtime('fastify', '^4.17.0'),
-      NpmDependency.runtime('@fastify/swagger', '^8.3.1'),
-      NpmDependency.runtime('@fastify/swagger-ui', '^1.8.1'),
-      NpmDependency.runtime('bson-objectid', '^2.0.4')
+      NpmDependency.runtime('express', '^4.18.2'),
+      NpmDependency.runtime('bson-objectid', '^2.0.4'),
+      NpmDependency.dev('@types/express', '^4.17.17')
     )
     project.file('.env').append({
-      SERVER_PORT: '5000',
+      SERVER_PORT: '6000',
       SERVER_HOST: '0.0.0.0',
     })
   }
@@ -68,7 +65,7 @@ export default class Manifest extends LibManifest {
       BundleFile.include(this, './src/application'),
       BundleFile.include(this, './src/bootstrap/controllers.basic.ts'),
       BundleFile.include(this, './src/bootstrap/server.ts'),
-      BundleFile.include(this, './src/infra/errors')
+      BundleFile.include(this, './src/infra/RouteUtils.ts')
     )
   }
 }

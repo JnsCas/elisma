@@ -10,13 +10,24 @@ const libraryPath = path.join(process.cwd(), 'lib')
 describe('BundleService', () => {
   test('builds a project', async () => {
     const manager = new BundleService(libraryPath)
-    const outputDir = path.join(process.cwd(), 'out', 'bundler')
+    const outputDirFastify = path.join(process.cwd(), 'out', 'bundler-fastify')
+    const outputDirExpress = path.join(process.cwd(), 'out', 'bundler-express')
     const packageJson = JSON.parse((await fs.readFile(path.join(process.cwd(), 'src', 'package.base.json'))).toString())
-    const candidateLibs = ['fastify', 'postgres', 'mongo', 'readme', 'docker-compose']
-    const manifests = await manager.findManifests(candidateLibs)
+    const candidateLibs = ['postgres', 'mongo', 'readme', 'docker-compose']
+    const manifestsFastify = await manager.findManifests([...candidateLibs, 'fastify'])
+    const manifestsExpress = await manager.findManifests([...candidateLibs, 'express'])
 
     await manager.build(
-      Bundle.create(NpmProject.create('@quorum/example', ProjectLanguage.TYPESCRIPT, manifests, packageJson), outputDir)
+      Bundle.create(
+        NpmProject.create('@quorum/example', ProjectLanguage.TYPESCRIPT, manifestsFastify, packageJson),
+        outputDirFastify
+      )
+    )
+    await manager.build(
+      Bundle.create(
+        NpmProject.create('@quorum/example', ProjectLanguage.TYPESCRIPT, manifestsExpress, packageJson),
+        outputDirExpress
+      )
     )
   })
 })

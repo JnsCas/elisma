@@ -12,7 +12,7 @@ export default class Manifest extends LibManifest {
       name: 'mongo',
       description: 'mongodb database driver',
       category: LibCategory.DatabaseDriver,
-      requires: [LibDependency.byName('pino'), LibDependency.byName('dataSource')],
+      requires: [LibDependency.byName('pino'), LibDependency.byName('data-source')],
       docs: `
         This library implements a data source for MongoDB.
         
@@ -53,7 +53,7 @@ export default class Manifest extends LibManifest {
   }
 
   async prepareBundle(bundle: Bundle<any>): Promise<void> {
-    if (bundle.hasLib('dotenv') && bundle.hasLib('elisma')) {
+    if (bundle.hasLib('dotenv') && bundle.hasLib('elisma-loader')) {
       bundle.addFiles(BundleFile.include(this, './src/bootstrap/mongo.ts'))
     }
     bundle.addFiles(BundleFile.include(this, './src/infra/db/mongo'))

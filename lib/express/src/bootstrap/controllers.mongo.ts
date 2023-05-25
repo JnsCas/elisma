@@ -1,5 +1,5 @@
 import { asFunction } from 'awilix'
-import { HelloController } from '@quorum/lib/fastify/src/application/controllers/hello/HelloController'
+import { HelloController } from '@quorum/lib/express/src/application/controllers/hello/HelloController'
 import { createLogger } from '@quorum/lib/pino/src/infra/log'
 import { ApplicationContainer, ApplicationRegistry } from '@quorum/lib/elisma-loader/src/infra/bootstrap'
 import { MongoDataSource } from '@quorum/lib/mongo/src/infra/db/mongo/MongoDataSource'

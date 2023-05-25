@@ -1,7 +1,7 @@
 import { PostgresDataSource } from '@quorum/lib/postgres/src/infra/db/PostgresDataSource'
-import { PingRepository } from '@quorum/lib/fastify/src/domain/pings/PingRepository'
-import { Optional } from '@quorum/lib/elisma/src/infra/Optional'
-import { Ping } from '@quorum/lib/fastify/src/domain/pings/entities/Ping'
+import { PingRepository } from '@quorum/lib/ping-domain/src/domain/pings/PingRepository'
+import { Ping } from '@quorum/lib/ping-domain/src/domain/pings/entities/Ping'
+import { Optional } from '@quorum/lib/elisma-loader/src/infra/Optional'
 
 const FIND_BY_ID = 'SELECT * FROM pings WHERE id=$1'
 const SAVE_PING = 'INSERT INTO pings (id, message, created_at) VALUES ($1, $2, $3)'
