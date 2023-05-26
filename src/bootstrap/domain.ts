@@ -8,9 +8,14 @@ import { OpenAIClient } from '@quorum/elisma/src/domain/openai/OpenAIClient'
 import { SessionRepository } from '@quorum/elisma/src/domain/session/SessionRepository'
 import { BundleService } from '@quorum/elisma/src/domain/bundle/BundleService'
 import { DistributionService } from '@quorum/elisma/src/domain/bundle/DistributionService'
+import { ManifestService } from '@quorum/elisma/src/domain/bundle/ManifestService'
 
 function newOpenAIApi() {
   return new OpenAIApi(new Configuration(openAIConfig))
+}
+
+function newManifestService(): ManifestService {
+  return new ManifestService(server.libraryPath)
 }
 
 function newBundleService(): BundleService {
@@ -39,6 +44,7 @@ function initServices() {
     sessionService: asClass(SessionService).singleton(),
     openAIService: asClass(OpenAIService).singleton(),
     bundleService: asFunction(newBundleService),
+    manifestService: asFunction(newManifestService),
     distributionService: asFunction(newDistributionService),
   }
 }
