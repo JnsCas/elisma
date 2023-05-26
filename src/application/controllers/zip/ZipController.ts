@@ -56,7 +56,7 @@ export class ZipController {
       throw new ResourceNotFoundError(`session not found: ${sessionId}`)
     }
 
-    const scaffolding = session.getScaffolding
+    const scaffolding = session.getScaffolding //FIXME create scaffolding and update session
 
     if (scaffolding.nameIsEmpty() || scaffolding.languageIsEmpty()) {
       throw new BadRequestError('project name or programming language not specified')

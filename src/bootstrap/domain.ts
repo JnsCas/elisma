@@ -3,8 +3,6 @@ import { openAIConfig, server } from '@quorum/elisma/src/config'
 import { asClass, asFunction } from 'awilix'
 import { Configuration, OpenAIApi } from 'openai'
 import { SessionService } from '@quorum/elisma/src/domain/session/SessionService'
-import { OpenAIService } from '@quorum/elisma/src/domain/openai/OpenAIService'
-import { OpenAIClient } from '@quorum/elisma/src/domain/openai/OpenAIClient'
 import { SessionRepository } from '@quorum/elisma/src/domain/session/SessionRepository'
 import { BundleService } from '@quorum/elisma/src/domain/bundle/BundleService'
 import { DistributionService } from '@quorum/elisma/src/domain/bundle/DistributionService'
@@ -24,7 +22,6 @@ function newDistributionService(): DistributionService {
 function initClients() {
   return {
     openAIApi: asFunction(newOpenAIApi).singleton(),
-    openAIClient: asClass(OpenAIClient).singleton(),
   }
 }
 
@@ -37,7 +34,6 @@ function initRepositories() {
 function initServices() {
   return {
     sessionService: asClass(SessionService).singleton(),
-    openAIService: asClass(OpenAIService).singleton(),
     bundleService: asFunction(newBundleService),
     distributionService: asFunction(newDistributionService),
   }

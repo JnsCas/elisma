@@ -6,13 +6,3 @@ export const SupportedLibraries: LibraryDefinition[] = [
   LibraryDefinition.create('postgres', 'database driver', 'https://www.npmjs.com/package/pg'),
   LibraryDefinition.create('mongo', 'database driver', 'https://www.npmjs.com/package/mongodb'),
 ]
-
-export const SUPPORTED_LIBRARIES_JSON = SupportedLibraries.reduce(
-  (result: { [key: string]: any }, library: LibraryDefinition) => {
-    if (!result.hasOwnProperty(library.packageName)) {
-      result[library.packageName] = { category: library.category }
-    }
-    return result
-  },
-  {}
-)
