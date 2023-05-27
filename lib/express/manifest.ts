@@ -20,6 +20,7 @@ export default class Manifest extends LibManifest {
         LibDependency.byName('pino'),
         LibDependency.byName('dotenv'),
         LibDependency.byName('ping-domain'),
+        LibDependency.byCategory(LibCategory.Logger),
       ],
       excludes: [LibDependency.byCategory(LibCategory.CLI), LibDependency.byCategory(LibCategory.WebFramework)],
       docs: `
