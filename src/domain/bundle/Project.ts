@@ -5,28 +5,27 @@ import { ProjectFile } from '@quorum/elisma/src/domain/bundle/entities/ProjectFi
 import { ProjectFileHandler } from '@quorum/elisma/src/domain/bundle/entities/ProjectFileHandler'
 import { createLogger } from '@quorum/elisma/src/infra/log'
 import { LibManifest } from '@quorum/elisma/src/domain/bundle/LibManifest'
+import { NPM_PROJECT_FILE } from '@quorum/elisma/src/domain/bundle/npm/NpmProjectFileHandler'
 
 const logger = createLogger('Project')
 
-export abstract class Project<DependencyType> {
+export abstract class Project {
   protected constructor(
     /** Project name. */
     readonly name: any,
     /** Programming language. */
     readonly language: ProjectLanguage,
     /** Libraries included in this project. */
-    readonly manifests: LibManifest[],
-    /** Object representing the project metadata. */
-    readonly metadata: any
+    readonly manifests: LibManifest[]
   ) {}
 
-  abstract addDependencies(...dependencies: DependencyType[]): Project<DependencyType>
-  abstract writeTo(outputDir: string): Promise<void>
+  abstract addDependencies(...dependencies: any[]): Project
+  abstract get configFile(): ProjectFile
 
   private readonly files: { [key: string]: ProjectFile } = {}
   private readonly filesHandlers: { [key: string]: ProjectFileHandler } = {}
 
-  registerFileHandler(handler: ProjectFileHandler): Project<DependencyType> {
+  registerFileHandler(handler: ProjectFileHandler): Project {
     if (!this.filesHandlers[handler.name]) {
       this.filesHandlers[handler.name] = handler
     }

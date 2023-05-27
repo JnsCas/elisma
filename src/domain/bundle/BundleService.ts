@@ -1,6 +1,5 @@
 import * as fs from 'fs/promises'
 import path from 'path'
-import { LibManifest } from '@quorum/elisma/src/domain/bundle/LibManifest'
 import Manifest from '@quorum/lib/fastify/manifest'
 import { Bundle } from '@quorum/elisma/src/domain/bundle/entities/Bundle'
 import { Project } from '@quorum/elisma/src/domain/bundle/Project'
@@ -15,15 +14,12 @@ export class BundleService {
     readonly libraryPath: string
   ) {}
 
-  async findManifests(libs: string[] = []): Promise<LibManifest[]> {
-    return await this.resolveManifests(libs)
-  }
-
-  async build<T>(bundle: Bundle<T>): Promise<Bundle<T>> {
+  async build(bundle: Bundle): Promise<Bundle> {
     // cleans up output directory
     await fs.rm(bundle.outputDir, { recursive: true, force: true })
     await fs.mkdir(bundle.outputDir, { recursive: true })
 
+    await this.validateProject(bundle)
     await this.configureProject(bundle)
     await this.prepare(bundle)
     await this.validateFiles(bundle)
@@ -32,50 +28,20 @@ export class BundleService {
     return bundle
   }
 
-  private async loadManifests(): Promise<LibManifest[]> {
-    const libDirs = await fs.readdir(path.resolve(this.libraryPath))
-    return await Promise.all(
-      libDirs.map(async (libDir) => {
-        const manifestFile = path.join(this.libraryPath, libDir, 'manifest.ts')
-        logger.info(`loading manifest: ${manifestFile}`)
-        const Manifest = (await require(manifestFile)).default
-        return new Manifest()
-      })
-    )
-  }
+  private async validateProject(bundle: Bundle) {
+    const invalidByLanguage = bundle.project.manifests
+      .filter((manifest) => manifest.languages.length && !manifest.languages.includes(bundle.project.language))
+      .map((manifest) => manifest.name)
 
-  private async resolveManifests(libs: string[]): Promise<Manifest[]> {
-    const manifests = await this.loadManifests()
-    let candidateManifests: Manifest[] = manifests
-
-    if (libs.length > 0) {
-      candidateManifests = libs.map((lib) => {
-        const manifest = manifests.find((manifest) => manifest.name === lib)
-        if (!manifest) {
-          throw new Error(`manifest not found for library: ${lib}`)
-        }
-        return manifest
-      })
+    if (invalidByLanguage.length) {
+      throw new Error(`
+        the following libraries do not support the project programming language:
+        language=${bundle.project.language}, libraries=${invalidByLanguage.join(',')}
+      `)
     }
-
-    const dependencyNames: string[] = [
-      ...new Set(candidateManifests.flatMap((manifest) => manifest.requires.map((dependency) => dependency.name))),
-    ].filter((dependency) => dependency !== undefined) as string[]
-
-    const dependencies = dependencyNames.map((dependency) => {
-      const manifest = manifests.find((manifest) => manifest.name === dependency)
-      if (!manifest) {
-        throw new Error(`manifest not found for library: ${dependency}`)
-      }
-      return manifest
-    })
-
-    return [...new Set([...candidateManifests, ...dependencies])].sort(
-      (manifest1, manifest2) => manifest2.order - manifest1.order
-    )
   }
 
-  private async prepare<T>(bundle: Bundle<T>): Promise<void> {
+  private async prepare(bundle: Bundle): Promise<void> {
     await Promise.all(
       bundle.project.manifests.map(async (manifest: Manifest) => {
         await manifest.prepareBundle(bundle)
@@ -83,7 +49,7 @@ export class BundleService {
     )
   }
 
-  private async validateFiles<T>(bundle: Bundle<T>): Promise<void> {
+  private async validateFiles(bundle: Bundle): Promise<void> {
     await Promise.all(
       bundle.files.map(async (file) => {
         const source = path.resolve(this.libraryPath, file.source)
@@ -97,15 +63,14 @@ export class BundleService {
     )
   }
 
-  private async configureProject<T>(bundle: Bundle<T>) {
+  private async configureProject(bundle: Bundle) {
     await Promise.all(
-      bundle.project.manifests.map(async (manifest) => await manifest.configureProject(bundle.project as Project<any>))
+      bundle.project.manifests.map(async (manifest) => await manifest.configureProject(bundle.project as Project))
     )
-    await bundle.project.writeTo(bundle.outputDir)
     await bundle.project.writeConfig(bundle.outputDir)
   }
 
-  private async copyFiles<T>(bundle: Bundle<T>) {
+  private async copyFiles(bundle: Bundle) {
     // prevents concurrent modification
     const files = [...bundle.files]
 
@@ -138,7 +103,7 @@ export class BundleService {
     }
   }
 
-  private async filterFile<T>(bundle: Bundle<T>, file: string): Promise<string> {
+  private async filterFile(bundle: Bundle, file: string): Promise<string> {
     const content = (await fs.readFile(file)).toString()
     let normalizedName: string = bundle.project.name
 
@@ -149,7 +114,7 @@ export class BundleService {
     return content.replaceAll(/@quorum\/lib\/[\w-]+\//gi, normalizedName)
   }
 
-  private async filterDirectory(bundle: Bundle<any>, dataDir: BundleFile) {
+  private async filterDirectory(bundle: Bundle, dataDir: BundleFile) {
     // traverse the directory tree using a queue to avoid recursion.
     const queue: string[] = await fs.readdir(path.join(this.libraryPath, dataDir.source))
 

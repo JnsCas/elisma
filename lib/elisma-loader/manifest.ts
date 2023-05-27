@@ -3,14 +3,15 @@ import { Bundle } from '@quorum/elisma/src/domain/bundle/entities/Bundle'
 import { BundleFile } from '@quorum/elisma/src/domain/bundle/entities/BundleFile'
 import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
 import { NpmDependency } from '@quorum/elisma/src/domain/bundle/npm/NpmDependency'
-import { Project } from '@quorum/elisma/src/domain/bundle/Project'
 import { LibDependency } from '@quorum/elisma/src/domain/bundle/entities/LibDependency'
 import { LibCategory } from '@quorum/elisma/src/domain/bundle/entities/LibCategory'
+import { Project } from '@quorum/elisma/src/domain/bundle/Project'
 
 export default class Manifest extends LibManifest {
   constructor() {
     super({
       name: 'elisma-loader',
+      languages: [ProjectLanguage.TYPESCRIPT, ProjectLanguage.JAVASCRIPT],
       description: 'Opinionated application loader',
       category: LibCategory.Loader,
       requires: [LibDependency.byName('pino'), LibDependency.byName('dotenv')],
@@ -40,7 +41,7 @@ export default class Manifest extends LibManifest {
     })
   }
 
-  async configureProject(project: Project<any>): Promise<void> {
+  async configureProject(project: Project): Promise<void> {
     if (project.language === ProjectLanguage.TYPESCRIPT) {
       project.addDependencies(
         NpmDependency.runtime('tsconfig-paths', '^4.2.0'),
@@ -60,14 +61,20 @@ export default class Manifest extends LibManifest {
       NpmDependency.dev('lint-staged', '^13.2.2'),
       NpmDependency.dev('husky', '^8.0.3')
     )
-    project.metadata['lint-staged'] = {
-      '*.{js,cjs,ts}': 'eslint --cache --fix',
-      '*.{css,md}': 'prettier --write',
-    }
-    project.metadata.scripts['start'] = 'ts-node-dev -r tsconfig-paths/register src/index.ts'
+    project.configFile.append({
+      'lint-staged': {
+        '*.{js,cjs,ts}': 'eslint --cache --fix',
+        '*.{css,md}': 'prettier --write',
+      },
+    })
+    project.configFile.append({
+      scripts: {
+        start: 'ts-node-dev -r tsconfig-paths/register src/index.ts',
+      },
+    })
   }
 
-  async prepareBundle(bundle: Bundle<any>): Promise<void> {
+  async prepareBundle(bundle: Bundle): Promise<void> {
     if (bundle.project.language === ProjectLanguage.TYPESCRIPT) {
       bundle.addFiles(BundleFile.include(this, './config/.eslintrc.typescript.cjs', './.eslintrc.cjs'))
     } else if (bundle.project.language === ProjectLanguage.JAVASCRIPT) {

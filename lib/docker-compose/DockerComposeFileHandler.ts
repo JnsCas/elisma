@@ -13,7 +13,7 @@ export class DockerComposeFileHandler extends ProjectFileHandler {
     super(FILE_NAME)
   }
 
-  async writeTo(project: Project<any>, file: ProjectFile, outputDir: string): Promise<void> {
+  async writeTo(project: Project, file: ProjectFile, outputDir: string): Promise<void> {
     const config = file.getEntries().reduce((result, config) => {
       const services = Object.assign({}, result.services, config.services)
       return { ...result, ...config, services }

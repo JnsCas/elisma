@@ -11,5 +11,5 @@ export abstract class ProjectFileHandler {
     return configFile.name === this.name
   }
 
-  abstract writeTo(project: Project<any>, file: ProjectFile, outputDir: string): Promise<void>
+  abstract writeTo(project: Project, file: ProjectFile, outputDir: string): Promise<void>
 }

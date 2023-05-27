@@ -3,11 +3,13 @@ import { Bundle } from '@quorum/elisma/src/domain/bundle/entities/Bundle'
 import { BundleFile } from '@quorum/elisma/src/domain/bundle/entities/BundleFile'
 import { LibDependency } from '@quorum/elisma/src/domain/bundle/entities/LibDependency'
 import { LibCategory } from '@quorum/elisma/src/domain/bundle/entities/LibCategory'
+import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
 
 export default class Manifest extends LibManifest {
   constructor() {
     super({
       name: 'data-source',
+      languages: [ProjectLanguage.TYPESCRIPT, ProjectLanguage.JAVASCRIPT],
       description: 'data source common interface',
       category: LibCategory.DatabaseDriver,
       requires: [LibDependency.byName('pino')],
@@ -18,7 +20,7 @@ export default class Manifest extends LibManifest {
     })
   }
 
-  async prepareBundle(bundle: Bundle<any>): Promise<void> {
+  async prepareBundle(bundle: Bundle): Promise<void> {
     bundle.addFiles(BundleFile.include(this, './src/infra/db'))
   }
 }
