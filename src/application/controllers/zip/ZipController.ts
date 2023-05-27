@@ -46,7 +46,7 @@ export class ZipController {
   }
 
   async generate(req: GenerateZipRequest, res: FastifyReply): Promise<void> {
-    const { selectedLibraries } = req.body
+    const { projectName, selectedLanguage, selectedLibraries } = req.body
 
     logger.info(`Generating zip with payload ${JSON.stringify(selectedLibraries)}...`)
 
@@ -54,12 +54,6 @@ export class ZipController {
     const session = await this.sessionService.getById(sessionId)
     if (!session) {
       throw new ResourceNotFoundError(`session not found: ${sessionId}`)
-    }
-
-    const scaffolding = session.getScaffolding //FIXME create scaffolding and update session
-
-    if (scaffolding.nameIsEmpty() || scaffolding.languageIsEmpty()) {
-      throw new BadRequestError('project name or programming language not specified')
     }
 
     const packageJson = JSON.parse((await fs.readFile(path.join(process.cwd(), 'src', 'package.base.json'))).toString())
@@ -70,13 +64,13 @@ export class ZipController {
         ) as LibraryDefinition
     )
     // eslint-disable-next-line no-control-regex
-    const name = (scaffolding.getName as string).replace(/[^\x00-\x7F]/g, '')
+    const name = projectName.replace(/[^\x00-\x7F]/g, '')
     const normalizedName = name.startsWith('@') ? name : `@${name}`
     const outputDir = path.join(process.cwd(), `out/${sessionId}/`)
 
     const bundle = await this.bundleService.build(
       Bundle.create(
-        NpmProject.create(normalizedName, scaffolding.getLanguage as ProjectLanguage, packageJson),
+        NpmProject.create(normalizedName, selectedLanguage as ProjectLanguage, packageJson),
         libs,
         outputDir
       )
