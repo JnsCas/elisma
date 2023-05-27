@@ -5,11 +5,11 @@ export enum LibCategory {
   ORM = 'orm',
   ActiveRecord = 'active record',
   DataStore = 'data store',
-  Queue = 'queue',
   Infra = 'infrastructure',
   Configuration = 'configuration',
   Documentation = 'documentation',
   CLI = 'command line interface',
   Loader = 'loader',
+  ProjectComponent = 'project components',
   Other = 'other',
 }

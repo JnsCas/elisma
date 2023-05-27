@@ -4,8 +4,8 @@ import { CustomErrorHandler } from '@quorum/lib/fastify/src/infra/errors/CustomE
 import swagger from '@quorum/lib/fastify/src/application/plugins/swagger'
 import { register } from '@quorum/lib/fastify/src/application/controllers'
 import { createWebLogger } from '@quorum/lib/pino/src/infra/log'
-import { ApplicationContainer, ApplicationRegistry } from '@quorum/lib/elisma/src/infra/bootstrap'
-import { number, string } from '@quorum/lib/elisma/src/infra/configUtils'
+import { ApplicationContainer, ApplicationRegistry } from '@quorum/lib/elisma-loader/src/infra/bootstrap'
+import { number, string } from '@quorum/lib/elisma-loader/src/infra/configUtils'
 
 const logger = createWebLogger('web:elisma')
 

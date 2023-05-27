@@ -15,7 +15,7 @@ export class ProjectFile {
     return this
   }
 
-  getEntries(): { [key: string]: any }[] {
+  getEntries(): any[] {
     return [...this.entries]
   }
 }

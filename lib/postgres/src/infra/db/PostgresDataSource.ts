@@ -1,6 +1,6 @@
 import { Pool, PoolClient, QueryResult } from 'pg'
 import { createLogger } from '@quorum/lib/pino/src/infra/log'
-import { DataSource } from '@quorum/lib/dataSource/src/infra/db/DataSource'
+import { DataSource } from '@quorum/lib/data-source/src/infra/db/DataSource'
 
 const logger = createLogger('PostgresDataSource')
 

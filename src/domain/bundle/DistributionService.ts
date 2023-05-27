@@ -13,12 +13,12 @@ export class DistributionService {
     readonly outputDir: string
   ) {}
 
-  readZip(sessionId: string, bundle: Bundle<any>): ReadStream {
+  readZip(sessionId: string, bundle: Bundle): ReadStream {
     logger.info(`reading zip file for bundle: ${bundle.zipFileName}`)
     return createReadStream(path.join(this.outputDir, `${sessionId}.zip`))
   }
 
-  async generateZip(sessionId: string, bundle: Bundle<any>): Promise<void> {
+  async generateZip(sessionId: string, bundle: Bundle): Promise<void> {
     logger.info(`generating zip file for bundle: ${bundle.zipFileName}`)
     await this.buildZip(bundle.outputDir, path.join(this.outputDir, `${sessionId}.zip`))
   }

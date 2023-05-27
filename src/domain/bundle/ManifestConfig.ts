@@ -1,11 +1,14 @@
 import { LibDependency } from '@quorum/elisma/src/domain/bundle/entities/LibDependency'
 import { LibCategory } from '@quorum/elisma/src/domain/bundle/entities/LibCategory'
+import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
 
 export type ManifestConfig = {
   /** NPM package name. */
   name: string
   /** Library category. */
   category: LibCategory
+  /** Programming languages supported by this library. */
+  languages: ProjectLanguage[]
   /** Library description. */
   description?: string
   /** Library documentation. */

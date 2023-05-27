@@ -1,4 +1,3 @@
-import fs from 'fs/promises'
 import path from 'path'
 import { FastifyReply } from 'fastify'
 import { createLogger } from '@quorum/elisma/src/infra/log'
@@ -15,6 +14,7 @@ import { LibraryDefinition } from '@quorum/elisma/src/domain/bundle/entities/Lib
 import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
 import { DownloadZipRequest } from '@quorum/elisma/src/application/controllers/zip/entities/DownloadZipRequest'
 import { DistributionService } from '@quorum/elisma/src/domain/bundle/DistributionService'
+import { ManifestService } from '@quorum/elisma/src/domain/bundle/ManifestService'
 
 const logger = createLogger('ZipController')
 
@@ -24,6 +24,8 @@ export class ZipController {
     readonly sessionService: SessionService,
     /** Service to generate the project bundle. */
     readonly bundleService: BundleService,
+    /** Service to handle library manifests. */
+    readonly manifestService: ManifestService,
     /** Service to generate and read zip files. */
     readonly distributionService: DistributionService
   ) {}
@@ -62,7 +64,6 @@ export class ZipController {
       throw new BadRequestError('project name or programming language not specified')
     }
 
-    const packageJson = JSON.parse((await fs.readFile(path.join(process.cwd(), 'src', 'package.base.json'))).toString())
     const libs = selectedLibraries.map(
       (selectedLib) =>
         SupportedLibraries.find(
@@ -74,12 +75,9 @@ export class ZipController {
     const normalizedName = name.startsWith('@') ? name : `@${name}`
     const outputDir = path.join(process.cwd(), `out/${sessionId}/`)
 
-    const manifests = await this.bundleService.findManifests(libs.map((lib) => lib.packageName))
+    const manifests = await this.manifestService.findManifests(libs.map((lib) => lib.packageName))
     const bundle = await this.bundleService.build(
-      Bundle.create(
-        NpmProject.create(normalizedName, scaffolding.getLanguage as ProjectLanguage, manifests, packageJson),
-        outputDir
-      )
+      Bundle.create(NpmProject.create(normalizedName, scaffolding.getLanguage as ProjectLanguage, manifests), outputDir)
     )
 
     await this.sessionService.update(session.updateBundle(bundle))

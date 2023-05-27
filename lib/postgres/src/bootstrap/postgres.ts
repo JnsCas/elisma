@@ -1,9 +1,9 @@
 import { asFunction } from 'awilix'
 import { Pool } from 'pg'
-import { ApplicationContainer, ApplicationRegistry } from '@quorum/lib/elisma/src/infra/bootstrap'
+import { ApplicationContainer, ApplicationRegistry } from '@quorum/lib/elisma-loader/src/infra/bootstrap'
 import { createLogger } from '@quorum/lib/pino/src/infra/log'
 import { PostgresDataSource } from '@quorum/lib/postgres/src/infra/db/PostgresDataSource'
-import { string } from '@quorum/lib/elisma/src/infra/configUtils'
+import { string } from '@quorum/lib/elisma-loader/src/infra/configUtils'
 
 const logger = createLogger('bootstrap:dataSource')
 

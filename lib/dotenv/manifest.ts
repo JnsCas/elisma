@@ -5,11 +5,13 @@ import { Project } from '@quorum/elisma/src/domain/bundle/Project'
 import { NpmDependency } from '@quorum/elisma/src/domain/bundle/npm/NpmDependency'
 import { DotEnvFileHandler } from './DotEnvFileHandler'
 import { LibCategory } from '@quorum/elisma/src/domain/bundle/entities/LibCategory'
+import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
 
 export default class Manifest extends LibManifest {
   constructor() {
     super({
       name: 'dotenv',
+      languages: [ProjectLanguage.TYPESCRIPT, ProjectLanguage.JAVASCRIPT],
       description: 'reads environment configuration from a .env file',
       category: LibCategory.Configuration,
       unique: true,
@@ -29,12 +31,12 @@ export default class Manifest extends LibManifest {
     })
   }
 
-  async configureProject(project: Project<any>): Promise<void> {
+  async configureProject(project: Project): Promise<void> {
     project.addDependencies(NpmDependency.runtime('dotenv', '^16.0.3'))
     project.registerFileHandler(new DotEnvFileHandler())
   }
 
-  async prepareBundle(bundle: Bundle<any>): Promise<void> {
+  async prepareBundle(bundle: Bundle): Promise<void> {
     bundle.addFiles(BundleFile.include(this, './src/bootstrap/dotenv.ts'))
   }
 }

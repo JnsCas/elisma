@@ -1,10 +1,10 @@
 import { Schema } from 'mongoose'
 import { CollectionConfig } from '@quorum/lib/mongo/src/infra/db/mongo/CollectionConfig'
-import { Ping } from '@quorum/lib/fastify/src/domain/pings/entities/Ping'
-import { Optional } from '@quorum/lib/elisma/src/infra/Optional'
-import { createLogger } from '@quorum/lib/pino/src/infra/log'
 import { MongoDataSource } from '@quorum/lib/mongo/src/infra/db/mongo/MongoDataSource'
-import { PingRepository } from '@quorum/lib/fastify/src/domain/pings/PingRepository'
+import { Optional } from '@quorum/lib/elisma-loader/src/infra/Optional'
+import { createLogger } from '@quorum/lib/pino/src/infra/log'
+import { PingRepository } from '@quorum/lib/ping-domain/src/domain/pings/PingRepository'
+import { Ping } from '@quorum/lib/ping-domain/src/domain/pings/entities/Ping'
 
 export const PingCollection: CollectionConfig<Ping> = {
   name: 'pings',

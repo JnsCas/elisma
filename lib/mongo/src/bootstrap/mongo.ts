@@ -1,7 +1,7 @@
 import { asFunction } from 'awilix'
-import { ApplicationContainer, ApplicationRegistry } from '@quorum/lib/elisma/src/infra/bootstrap'
+import { ApplicationContainer, ApplicationRegistry } from '@quorum/lib/elisma-loader/src/infra/bootstrap'
 import { createLogger } from '@quorum/lib/pino/src/infra/log'
-import { string } from '@quorum/lib/elisma/src/infra/configUtils'
+import { string } from '@quorum/lib/elisma-loader/src/infra/configUtils'
 import { MongoDataSource } from '@quorum/lib/mongo/src/infra/db/mongo/MongoDataSource'
 
 const logger = createLogger('bootstrap:dataSource')
