@@ -48,7 +48,7 @@ export class ZipController {
   }
 
   async generate(req: GenerateZipRequest, res: FastifyReply): Promise<void> {
-    const { selectedLibraries } = req.body
+    const { projectName, selectedLanguage, selectedLibraries } = req.body
 
     logger.info(`Generating zip with payload ${JSON.stringify(selectedLibraries)}...`)
 
@@ -58,12 +58,6 @@ export class ZipController {
       throw new ResourceNotFoundError(`session not found: ${sessionId}`)
     }
 
-    const scaffolding = session.getScaffolding
-
-    if (scaffolding.nameIsEmpty() || scaffolding.languageIsEmpty()) {
-      throw new BadRequestError('project name or programming language not specified')
-    }
-
     const libs = selectedLibraries.map(
       (selectedLib) =>
         SupportedLibraries.find(
@@ -71,13 +65,13 @@ export class ZipController {
         ) as LibraryDefinition
     )
     // eslint-disable-next-line no-control-regex
-    const name = (scaffolding.getName as string).replace(/[^\x00-\x7F]/g, '')
+    const name = projectName.replace(/[^\x00-\x7F]/g, '')
     const normalizedName = name.startsWith('@') ? name : `@${name}`
     const outputDir = path.join(process.cwd(), `out/${sessionId}/`)
 
     const manifests = await this.manifestService.findManifests(libs.map((lib) => lib.packageName))
     const bundle = await this.bundleService.build(
-      Bundle.create(NpmProject.create(normalizedName, scaffolding.getLanguage as ProjectLanguage, manifests), outputDir)
+      Bundle.create(NpmProject.create(normalizedName, selectedLanguage as ProjectLanguage, manifests), outputDir)
     )
 
     await this.sessionService.update(session.updateBundle(bundle))

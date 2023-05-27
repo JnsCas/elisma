@@ -3,10 +3,10 @@ import { ApplicationContainer } from '@quorum/elisma/src/infra/bootstrap'
 import { HealthCheckController } from '@quorum/elisma/src/application/controllers/healthcheck/HealthCheckController'
 import { HEALTH_CHECK_OPTIONS } from '@quorum/elisma/src/application/controllers/healthcheck/schemas'
 import { SessionController } from '@quorum/elisma/src/application/controllers/session/SessionController'
-import { OpenAIController } from '@quorum/elisma/src/application/controllers/openai/OpenAIController'
-import { POST_OPENAI_OPTIONS } from '@quorum/elisma/src/application/controllers/openai/schemas'
 import { ZipController } from '@quorum/elisma/src/application/controllers/zip/ZipController'
 import { DOWNLOAD_ZIP_OPTIONS } from '@quorum/elisma/src/application/controllers/zip/schemas'
+import { LanguageController } from '@quorum/elisma/src/application/controllers/language/LanguageController'
+import { LibraryController } from '@quorum/elisma/src/application/controllers/library/LibraryController'
 
 /** Registers all restricted endpoints.
  * Public endpoints require authentication.
@@ -14,10 +14,11 @@ import { DOWNLOAD_ZIP_OPTIONS } from '@quorum/elisma/src/application/controllers
  * @param container {ApplicationContainer} IoC container.
  */
 export function register(app: FastifyInstance, container: ApplicationContainer) {
-  const openAIController: OpenAIController = container.cradle.openAIController
-  app.post('/openai/completion', POST_OPENAI_OPTIONS, openAIController.sendCompletion.bind(openAIController))
-  app.post('/openai/chat-completion', POST_OPENAI_OPTIONS, openAIController.chat.bind(openAIController))
-  app.get('/openai/ask-label', {}, openAIController.askProgrammingLanguage.bind(openAIController))
+  const languageController: LanguageController = container.cradle.languageController
+  app.get('/languages', {}, languageController.getAll.bind(languageController))
+
+  const libraryController: LibraryController = container.cradle.libraryController
+  app.get('/libs', {}, libraryController.getAll.bind(libraryController))
 
   const zipController: ZipController = container.cradle.zipController
   app.post('/zip', {}, zipController.generate.bind(zipController))

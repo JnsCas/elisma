@@ -3,186 +3,58 @@
 <head>
   <title>elisma</title>
   <style>
-    .input-container {
-        display: flex;
-    }
+      h1 {
+          color: #333;
+          font-size: 24px;
+          margin-bottom: 20px;
+      }
 
-    #myInput {
-        flex: 9;
-        width: 90%;
-        box-sizing: border-box;
-    }
+      label {
+          margin-right: 10px;
+      }
 
-    #talkButton {
-        flex: 1;
-        width: 10%;
-    }
+      select, input[type="text"] {
+          margin-bottom: 10px;
+          padding: 5px;
+          width: 200px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+      }
+
+      h2 {
+          font-size: 18px;
+          margin-bottom: 10px;
+      }
+
+      h4 {
+          font-size: 16px;
+          margin-bottom: 5px;
+      }
+
+      button {
+          padding: 10px 20px;
+          background-color: #333;
+          color: #fff;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+      }
   </style>
 
   <link rel="stylesheet" href="/assets/css/isma.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script>
-    const CATEGORY_TITLES = {
-      'web framework': 'Web Framework',
-      'test framework': 'Test Framework',
-      'logger': 'Logger',
-      'database driver': 'Database Driver',
-      'command line interface': 'Command Line Interface'
-    }
-
-    const doFirstQuestion = (sessionId) => {
-      disabledElements(true)
-      $.ajax({
-        url: "http://localhost:9000/api/v1/openai/ask-label",
-        type: "GET",
-        headers: {
-          'x-session-id': sessionId
-        },
-        success: function(response) {
-          $("#elismaResponseTextArea").val(response);
-          disabledElements(false)
-        },
-        error: function(xhr) {
-          alert("Error")
-        }
-      });
-    }
-
-    const disabledElements = (isLoading) => {
-      $("#elismaResponseTextArea").prop("disabled", isLoading);
-      $("#myInput").prop("disabled", isLoading);
-      $("#talkButton").prop("disabled", isLoading);
-
-      if (!isLoading) {
-        $("#myInput").focus();
-      }
-    }
-
-    let sessionId
-    $(document).ready(function() {
-      disabledElements(true)
-      $.ajax({
-        url: "http://localhost:9000/api/v1/sessions",
-        type: "POST",
-        success: function(response) {
-          sessionId = response.id
-          disabledElements(false)
-          doFirstQuestion(sessionId)
-        },
-        error: function(xhr) {
-          alert('Error');
-        }
-      });
-
-      $("#talkButton").click(function() {
-        disabledElements(true)
-        var inputValue = $("#myInput").val();
-        $("#myInput").prop('value', '')
-
-        const payload = {
-          prompt: inputValue
-        }
-        $.ajax({
-          url: "http://localhost:9000/api/v1/openai/chat-completion",
-          type: "POST",
-          data: JSON.stringify(payload),
-          headers: {
-            'x-session-id': sessionId
-          },
-          contentType: "application/json",
-          success: function(response) {
-            $("#elismaResponseTextArea").val(response.message)
-            const { selectedLibraries } = response.scaffolding
-            if (selectedLibraries.length > 0) {
-              $("#talkButton").prop("disabled", true);
-
-              const radioList = $("#radioList")
-              radioList.append($("<h2>").text('Select libraries:'))
-
-              const uniqueCategories = Array.from(new Set(selectedLibraries.map(library => library.category)))
-              uniqueCategories.forEach((category) => {
-                const categoryDiv = $("<div>");
-                const categoryTitle = $("<h4>").text(`${CATEGORY_TITLES[category]}:`);
-                categoryDiv.append(categoryTitle);
-                selectedLibraries.filter(library => library.category === category).forEach((library) => {
-                  const packageName = library.packageName;
-                  const radioBtn = $("<input type='radio' name='" + category + "' value='" + packageName + "'>");
-                  const label = $("<label>").text(packageName);
-                  categoryDiv.append(radioBtn);
-                  categoryDiv.append(label);
-                  categoryDiv.append("<br>");
-                });
-                radioList.append(categoryDiv);
-              })
-            } else {
-              disabledElements(false)
-            }
-
-            $('input[type="radio"]').on("change", () => {
-              if ($('input[type="radio"]:checked').length > 0) {
-                $("#downloadZip").show();
-
-              }
-            });
-
-          },
-          error: function(response) {
-            const errorMessage = response.responseText
-            alert(errorMessage)
-          }
-        });
-      });
-
-      $("#myInput").keypress(function(event) {
-        if (event.which === 13) {
-          event.preventDefault();
-          $("#talkButton").click();
-        }
-      });
-
-      $("#downloadZip").click(() => {
-        disabledElements(true)
-        const selectedLibraries = []
-        $('input[type="radio"]:checked').each(function() {
-          const category = $(this).attr("name")
-          const packageName = $(this).val()
-          selectedLibraries.push({ category: category, packageName: packageName })
-        })
-
-        const payload = {
-          selectedLibraries
-        }
-
-        $.ajax({
-          url: "http://localhost:9000/api/v1/zip",
-          type: "POST",
-          data: JSON.stringify(payload),
-          headers: {
-            'x-session-id': sessionId
-          },
-          contentType: "application/json",
-          success: (response) => {
-            window.location = `http://localhost:9000/api/v1/download/${sessionId}`
-          },
-          error: (xhr) => {
-            alert('Error')
-          }
-        });
-      });
-    });
-  </script>
+  <script type="text/javascript" src="index.js"></script>
 </head>
 <body>
   <div class="content">
     <h1>El IsmA</h1>
-    <textarea id="elismaResponseTextArea" rows="10" cols="50" readonly></textarea>
     <br>
-    <div class="input-container">
-      <input type="text" id="myInput" class="wide-input">
-      <button id="talkButton">Send</button>
-    </div>
+    <label for="languageSelect">Select Language</label>
+    <select id="languageSelect"></select>
     <br>
-    <div id="radioList"></div>
+    <label for="inputProjectName">Project Name</label><input type="text" id="inputProjectName">
+    <br>
+    <div id="checkboxContainer"></div>
     <br>
     <button id="downloadZip" hidden>Download Zip</button>
   </div>
