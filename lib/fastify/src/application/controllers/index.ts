@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
-import { PING_OPTIONS } from '@quorum/lib/fastify/src/application/controllers/schemas'
-import { ApplicationContainer } from '@quorum/lib/elisma/src/infra/bootstrap'
+import { PING_OPTIONS } from '@quorum/lib/fastify/src/application/controllers/hello/schemas'
+import { ApplicationContainer } from '@quorum/lib/elisma-loader/src/infra/bootstrap'
 
 /** Registers all endpoints.
  * @param app {FastifyInstance} Current application.

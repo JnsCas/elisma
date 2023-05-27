@@ -1,10 +1,10 @@
 import { asFunction } from 'awilix'
 import { createLogger } from '@quorum/lib/pino/src/infra/log'
-import { ApplicationContainer, ApplicationRegistry } from '@quorum/lib/elisma/src/infra/bootstrap'
-import { PingService } from '@quorum/lib/fastify/src/domain/pings/PingService'
-import { PostgresPingRepository } from '@quorum/lib/fastify/src/domain/pings/PostgresPingRepository'
+import { ApplicationContainer, ApplicationRegistry } from '@quorum/lib/elisma-loader/src/infra/bootstrap'
 import { PostgresDataSource } from '@quorum/lib/postgres/src/infra/db/PostgresDataSource'
-import { HelloController } from '@quorum/lib/fastify/src/application/controllers/hello-postgres/HelloController'
+import { PostgresPingRepository } from '@quorum/lib/ping-domain/src/domain/pings/PostgresPingRepository'
+import { PingService } from '@quorum/lib/ping-domain/src/domain/pings/PingService'
+import { HelloController } from '@quorum/lib/fastify/src/application/controllers/hello/HelloController'
 
 const logger = createLogger('bootstrap:controllers-postgres')
 

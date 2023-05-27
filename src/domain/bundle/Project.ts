@@ -1,39 +1,59 @@
+import path from 'path'
+import fs from 'fs/promises'
 import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
-import { ConfigFile } from '@quorum/elisma/src/domain/bundle/entities/ConfigFile'
+import { ProjectFile } from '@quorum/elisma/src/domain/bundle/entities/ProjectFile'
+import { ProjectFileHandler } from '@quorum/elisma/src/domain/bundle/entities/ProjectFileHandler'
+import { createLogger } from '@quorum/elisma/src/infra/log'
+import { LibManifest } from '@quorum/elisma/src/domain/bundle/LibManifest'
+import { NPM_PROJECT_FILE } from '@quorum/elisma/src/domain/bundle/npm/NpmProjectFileHandler'
 
-export abstract class Project<DependencyType> {
+const logger = createLogger('Project')
+
+export abstract class Project {
   protected constructor(
     /** Project name. */
     readonly name: any,
     /** Programming language. */
     readonly language: ProjectLanguage,
-    /** Object representing the project metadata. */
-    readonly metadata: any
+    /** Libraries included in this project. */
+    readonly manifests: LibManifest[]
   ) {}
 
-  abstract addDependencies(...dependencies: DependencyType[]): Project<DependencyType>
-  abstract writeTo(outputDir: string): Promise<void>
+  abstract addDependencies(...dependencies: any[]): Project
+  abstract get configFile(): ProjectFile
 
-  private readonly configFiles: { [key: string]: ConfigFile<any> } = {}
+  private readonly files: { [key: string]: ProjectFile } = {}
+  private readonly filesHandlers: { [key: string]: ProjectFileHandler } = {}
 
-  addConfigFile<T>(file: ConfigFile<T>): Project<DependencyType> {
-    if (!this.configFiles[file.name]) {
-      this.configFiles[file.name] = file
+  registerFileHandler(handler: ProjectFileHandler): Project {
+    if (!this.filesHandlers[handler.name]) {
+      this.filesHandlers[handler.name] = handler
     }
     return this
   }
 
-  configFile<T>(name: string): ConfigFile<T> {
-    if (!this.configFiles[name]) {
-      throw new Error(`config file does not exist: ${name}`)
+  file(name: string): ProjectFile {
+    if (!this.files[name]) {
+      this.files[name] = ProjectFile.create(name)
     }
 
-    return this.configFiles[name]
+    return this.files[name]
   }
 
   async writeConfig(outputDir: string): Promise<void> {
-    await Promise.all(Object.values(this.configFiles).map(async (configFile) =>
-      await configFile.writeTo(outputDir)
-    ))
+    logger.info(`writing configuration files to: ${outputDir}`)
+
+    await Promise.all(
+      Object.values(this.files).map(async (configFile) => {
+        const handler = Object.values(this.filesHandlers).find((handler) => handler.accepts(configFile))
+        if (handler) {
+          const configPath = path.resolve(outputDir, path.dirname(configFile.name))
+          await fs.mkdir(configPath, { recursive: true })
+          await handler.writeTo(this, configFile, outputDir)
+        } else {
+          logger.warn(`config file has no handler: ${configFile.name}`)
+        }
+      })
+    )
   }
 }

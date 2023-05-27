@@ -1,25 +1,32 @@
 import path from 'path'
-import * as fs from 'fs/promises'
 import { BundleService } from '@quorum/elisma/src/domain/bundle/BundleService'
-import { SupportedLibraries } from '@quorum/elisma/src/SupportedLibraries'
 import { Bundle } from '@quorum/elisma/src/domain/bundle/entities/Bundle'
 import { NpmProject } from '@quorum/elisma/src/domain/bundle/npm/NpmProject'
 import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
+import { ManifestService } from '@quorum/elisma/src/domain/bundle/ManifestService'
 
 const libraryPath = path.join(process.cwd(), 'lib')
 
-describe('BundleManager', () => {
+describe('BundleService', () => {
   test('builds a project', async () => {
+    const manifestService = new ManifestService(libraryPath)
     const manager = new BundleService(libraryPath)
-    const outputDir = path.join(process.cwd(), 'out', 'bundler')
-    const packageJson = JSON.parse((await fs.readFile(path.join(process.cwd(), 'src', 'package.base.json'))).toString())
-    const candidateLibs = ['fastify', 'postgres', 'mongo']
+    const outputDirFastify = path.join(process.cwd(), 'out', 'bundler-fastify')
+    const outputDirExpress = path.join(process.cwd(), 'out', 'bundler-express')
+    const candidateLibs = ['readme', 'docker-compose']
+    const manifestsFastify = await manifestService.findManifests([...candidateLibs, 'fastify'])
+    const manifestsExpress = await manifestService.findManifests([...candidateLibs, 'express'])
 
     await manager.build(
       Bundle.create(
-        NpmProject.create('@quorum/example', ProjectLanguage.TYPESCRIPT, packageJson),
-        SupportedLibraries.filter((lib) => candidateLibs.includes(lib.packageName)),
-        outputDir
+        NpmProject.create('@quorum/example', ProjectLanguage.TYPESCRIPT, manifestsFastify),
+        outputDirFastify
+      )
+    )
+    await manager.build(
+      Bundle.create(
+        NpmProject.create('@quorum/example', ProjectLanguage.TYPESCRIPT, manifestsExpress),
+        outputDirExpress
       )
     )
   })

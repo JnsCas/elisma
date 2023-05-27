@@ -1,6 +1,6 @@
 import { createConnection, disconnect, Connection } from 'mongoose'
 import { createLogger } from '@quorum/lib/pino/src/infra/log'
-import { DataSource } from '@quorum/lib/dataSource/src/infra/db/DataSource'
+import { DataSource } from '@quorum/lib/data-source/src/infra/db/DataSource'
 import { CollectionConfig } from '@quorum/lib/mongo/src/infra/db/mongo/CollectionConfig'
 import { OpenCollection } from '@quorum/lib/mongo/src/infra/db/mongo/OpenCollection'
 
