@@ -1,9 +1,5 @@
-const CATEGORY_TITLES = {
-  'web framework': 'Web Framework',
-  'test framework': 'Test Framework',
-  logger: 'Logger',
-  'database driver': 'Database Driver',
-  'command line interface': 'Command Line Interface',
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1)
 }
 
 const onError = (response) => {
@@ -27,15 +23,15 @@ const renderCheckboxes = (libraries) => {
   const uniqueCategories = Array.from(new Set(libraries.map((library) => library.category)))
   uniqueCategories.forEach((category) => {
     const categoryDiv = $('<div>')
-    const categoryTitle = $('<h4>').text(`${CATEGORY_TITLES[category]}:`)
+    const categoryTitle = $('<h4>').text(`${capitalizeFirstLetter(category)}:`)
     categoryDiv.append(categoryTitle)
 
     libraries
       .filter((library) => library.category === category)
       .forEach((library) => {
         const label = $('<label>')
-        const input = $('<input>').prop('type', 'checkbox').prop('name', library.category).val(library.packageName)
-        label.append(input, library.packageName)
+        const input = $('<input>').prop('type', 'checkbox').prop('name', library.category).val(library.name)
+        label.append(input, library.name)
         categoryDiv.append(label)
 
         categoryDiv.append('<br>')
@@ -118,7 +114,7 @@ $(document).ready(function () {
       .map(function () {
         return {
           category: $(this).attr('name'),
-          packageName: $(this).val(),
+          name: $(this).val(),
         }
       })
       .get()

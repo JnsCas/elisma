@@ -2,7 +2,6 @@ import { LibManifest } from '@quorum/elisma/src/domain/bundle/LibManifest'
 import { Project } from '@quorum/elisma/src/domain/bundle/Project'
 import { ReadmeFileHandler } from './ReadmeFileHandler'
 import { LibCategory } from '@quorum/elisma/src/domain/bundle/entities/LibCategory'
-import { ProjectLanguage } from '@quorum/elisma/src/domain/bundle/entities/ProjectLanguage'
 
 export default class Manifest extends LibManifest {
   constructor() {
