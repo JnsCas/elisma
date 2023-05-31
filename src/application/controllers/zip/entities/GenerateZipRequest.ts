@@ -2,7 +2,7 @@ import { FastifyRequest } from 'fastify'
 
 export type SelectedLibrary = {
   category: string
-  packageName: string
+  name: string
 }
 
 export type GenerateZipRequest = FastifyRequest<{

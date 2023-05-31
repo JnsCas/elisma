@@ -6,6 +6,7 @@ module.exports = {
   testMatch: ['**/test/**/*.test.ts', '**/test/**/*.test.js'],
   moduleNameMapper: {
     '^@quorum/elisma/src/(.*)$': '<rootDir>/src/$1',
+    '^@quorum/lib/(.*)$': '<rootDir>/lib/$1',
     '^@quorum/elisma/test/(.*)$': '<rootDir>/test/$1',
   },
   testTimeout: 15000,

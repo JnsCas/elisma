@@ -12,22 +12,9 @@ export class ManifestService {
     readonly libraryPath: string
   ) {}
 
-  async findManifests(libs: string[]): Promise<Manifest[]> {
-    const manifests = await this.loadManifests()
-    let candidateManifests: Manifest[] = manifests
-
-    if (libs.length > 0) {
-      candidateManifests = libs.map((lib) => {
-        const manifest = manifests.find((manifest) => manifest.name === lib)
-        if (!manifest) {
-          throw new Error(`manifest not found for library: ${lib}`)
-        }
-        return manifest
-      })
-    }
-
-    const dependencies = this.resolveDependencies(manifests, candidateManifests)
-
+  async findManifests(candidateManifests: LibManifest[]): Promise<Manifest[]> {
+    const allManifests = await this.loadManifests()
+    const dependencies = this.resolveDependencies(allManifests, candidateManifests)
     const resolvedManifests = [...new Set([...candidateManifests, ...dependencies])].sort(
       (manifest1, manifest2) => manifest2.order - manifest1.order
     )
@@ -35,7 +22,7 @@ export class ManifestService {
     return this.validateExclusions(this.validateDependencies(resolvedManifests))
   }
 
-  private async loadManifests(): Promise<LibManifest[]> {
+  async loadManifests(): Promise<LibManifest[]> {
     const libDirs = await fs.readdir(path.resolve(this.libraryPath))
     return await Promise.all(
       libDirs.map(async (libDir) => {

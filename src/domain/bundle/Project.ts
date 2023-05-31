@@ -5,7 +5,6 @@ import { ProjectFile } from '@quorum/elisma/src/domain/bundle/entities/ProjectFi
 import { ProjectFileHandler } from '@quorum/elisma/src/domain/bundle/entities/ProjectFileHandler'
 import { createLogger } from '@quorum/elisma/src/infra/log'
 import { LibManifest } from '@quorum/elisma/src/domain/bundle/LibManifest'
-import { NPM_PROJECT_FILE } from '@quorum/elisma/src/domain/bundle/npm/NpmProjectFileHandler'
 
 const logger = createLogger('Project')
 
